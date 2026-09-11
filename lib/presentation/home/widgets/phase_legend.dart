@@ -46,7 +46,7 @@ class PhaseLegend extends StatelessWidget {
             _LegendItem(
               color: theme.lutealColor,
               label: 'Luteal',
-              isActive: activePhase?.toLowerCase() == 'luteal',
+              isActive: activePhase?.toLowerCase() == 'luteal' || activePhase?.toLowerCase() == 'leutal',
               theme: theme,
             ),
           ],

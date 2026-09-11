@@ -34,7 +34,7 @@ class NutritionScreen extends StatelessWidget {
               ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1, end: 0),
               const SizedBox(height: 4),
               Text(
-                'ICMR-NIN 2024 RDA & hormonal targets',
+                'Daily nutritional & hormonal targets',
                 style: theme.screenSubtitleStyle,
               ).animate().fadeIn(duration: 350.ms),
 

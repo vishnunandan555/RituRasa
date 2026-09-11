@@ -71,12 +71,12 @@ class FloatingPillNavBar extends StatelessWidget {
         ),
         tabs: const [
           GButton(
-            icon: Icons.kitchen_outlined,
-            text: 'Kitchen',
+            icon: Icons.restaurant_rounded,
+            text: 'Eat',
           ),
           GButton(
-            icon: Icons.pie_chart_outline_rounded,
-            text: 'Nutrition',
+            icon: Icons.kitchen_outlined,
+            text: 'Kitchen',
           ),
           GButton(
             icon: Icons.home_rounded,
@@ -84,7 +84,7 @@ class FloatingPillNavBar extends StatelessWidget {
           ),
           GButton(
             icon: Icons.shopping_bag_outlined,
-            text: 'Shopping',
+            text: 'Cart',
           ),
           GButton(
             icon: Icons.person_outline_rounded,

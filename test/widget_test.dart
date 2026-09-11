@@ -3,11 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riturasa/main.dart';
 import 'package:riturasa/presentation/navigation/widgets/floating_pill_nav_bar.dart';
-
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 void main() {
-  testWidgets('App renders Home Screen in center by default and switches between all 5 modules', (WidgetTester tester) async {
+  testWidgets('App renders Home Screen in center by default and switches between all 5 SRS screens', (WidgetTester tester) async {
     // Provide a standard phone screen size
     tester.view.physicalSize = const Size(412, 915);
     tester.view.devicePixelRatio = 1.0;
@@ -31,33 +30,37 @@ void main() {
     expect(find.text('Luteal'), findsOneWidget);
     expect(find.text('Ovulation'), findsOneWidget);
     expect(find.text('Next Period'), findsOneWidget);
+    expect(find.text('What should you eat next?'), findsOneWidget);
+    expect(find.text('Spinach Moong Dal'), findsOneWidget);
 
     // Verify Navigation bar tabs exist
     expect(find.byType(FloatingPillNavBar), findsOneWidget);
     expect(find.byType(GButton), findsNWidgets(5));
 
-    // Tap Kitchen Tab (Index 0)
+    // Tap Eat Tab (Index 0)
     await tester.tap(find.byType(GButton).at(0));
     await tester.pumpAndSettle();
-    expect(find.text('Kitchen & Pantry'), findsOneWidget);
-    expect(find.text('Ragi Flour (Finger Millet)'), findsOneWidget);
+    expect(find.text('What should I eat?'), findsOneWidget);
+    expect(find.text('Based on your kitchen'), findsOneWidget);
 
-    // Tap Nutrition Tab (Index 1)
+    // Tap Kitchen Tab (Index 1)
     await tester.tap(find.byType(GButton).at(1));
     await tester.pumpAndSettle();
-    expect(find.text('Daily Nutrition'), findsOneWidget);
-    expect(find.text('Energy Consumed'), findsOneWidget);
+    expect(find.text('My Kitchen'), findsOneWidget);
+    expect(find.text('What do you have at home?'), findsOneWidget);
+    expect(find.text('Fresh Spinach (Palak)'), findsOneWidget);
 
-    // Tap Shopping Tab (Index 3)
+    // Tap Cart Tab (Index 3)
     await tester.tap(find.byType(GButton).at(3));
     await tester.pumpAndSettle();
-    expect(find.text('Smart Grocery List'), findsOneWidget);
+    expect(find.text('My Shopping List'), findsOneWidget);
 
     // Tap Profile Tab (Index 4)
     await tester.tap(find.byType(GButton).at(4));
     await tester.pumpAndSettle();
     expect(find.text('My Profile'), findsOneWidget);
     expect(find.text('Ananya Sharma'), findsOneWidget);
+    expect(find.text('Cycle Information'), findsOneWidget);
 
     // Tap back to Home Tab (Index 2)
     await tester.tap(find.byType(GButton).at(2));
@@ -92,7 +95,24 @@ void main() {
     expect(find.text('Cycle Day'), findsOneWidget);
   });
 
-  testWidgets('Nutrition Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
+  testWidgets('Eat Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(340, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: RituRasaApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(GButton).at(0));
+    await tester.pumpAndSettle();
+    expect(find.text('What should I eat?'), findsOneWidget);
+  });
+
+  testWidgets('Kitchen Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(340, 700);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -106,10 +126,10 @@ void main() {
 
     await tester.tap(find.byType(GButton).at(1));
     await tester.pumpAndSettle();
-    expect(find.text('Daily Nutrition'), findsOneWidget);
+    expect(find.text('My Kitchen'), findsOneWidget);
   });
 
-  testWidgets('Shopping Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
+  testWidgets('Cart Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(340, 700);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -123,7 +143,7 @@ void main() {
 
     await tester.tap(find.byType(GButton).at(3));
     await tester.pumpAndSettle();
-    expect(find.text('Smart Grocery List'), findsOneWidget);
+    expect(find.text('My Shopping List'), findsOneWidget);
   });
 
   testWidgets('Profile Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
@@ -143,4 +163,3 @@ void main() {
     expect(find.text('My Profile'), findsOneWidget);
   });
 }
-

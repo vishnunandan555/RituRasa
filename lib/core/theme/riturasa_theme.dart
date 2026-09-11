@@ -101,7 +101,10 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   double get cardHorizontalPadding => isCompact ? 12.0 : 16.0;
 
   /// Responsive dial size for CycleWheel
-  double get dialSize => (screenWidth * 0.72).clamp(240.0, 310.0);
+  double get dialSize => (screenWidth - (screenPadding * 2)).clamp(300.0, 356.0);
+
+  /// Subtle light surface for input fields and containers
+  Color get surfaceContainer => const Color(0xFFF9FAFB);
 
   const RituRasaThemeExtension({
     this.screenWidth = 390.0,
@@ -577,3 +580,6 @@ extension RituRasaThemeContext on BuildContext {
   double scaleFont(double fontSize) => rituTheme.scaleFont(fontSize);
   bool get isCompact => rituTheme.isCompact;
 }
+
+/// Convenience alias for RituRasaThemeExtension
+typedef RituRasaThemeData = RituRasaThemeExtension;

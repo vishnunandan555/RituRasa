@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'cycle_wheel_painter.dart';
 
@@ -213,6 +214,24 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 4),
+                  // Active 4-Cycle Phase Pill Badge (Period, Growth, Peak, Luteal)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: _getPhaseColor(widget.currentPhaseName, theme).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      widget.currentPhaseName,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: _getPhaseColor(widget.currentPhaseName, theme),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                 ],
               )
                   .animate()
@@ -223,5 +242,14 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  Color _getPhaseColor(String phaseName, RituRasaThemeExtension theme) {
+    return switch (phaseName.toLowerCase()) {
+      'period' => theme.periodColor,
+      'growth' => theme.growthColor,
+      'peak' => theme.peakColor,
+      _ => theme.lutealColor,
+    };
   }
 }

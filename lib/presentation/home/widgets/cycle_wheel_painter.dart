@@ -29,19 +29,18 @@ class CycleWheelPainter extends CustomPainter {
     this.pulseProgress = 0.0,
   });
 
-  // Phase boundary days (inclusive end)
+  // Continuous 4-phase boundaries connecting seamlessly at boundary beads
   static const _phaseBoundaries = [
-    (start: 1, end: 5),   // Period
-    (start: 6, end: 10),  // Growth
-    (start: 11, end: 13), // Peak
-    (start: 14, end: 14), // Ovulation (Peak)
-    (start: 15, end: 28), // Luteal
+    (start: 1.0, end: 5.0, name: 'Period'),
+    (start: 5.0, end: 10.0, name: 'Growth'),
+    (start: 10.0, end: 14.0, name: 'Peak'),
+    (start: 14.0, end: 28.0, name: 'Luteal'),
   ];
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (min(size.width, size.height) / 2) - 26;
+    final radius = (min(size.width, size.height) / 2) - 22;
 
     const startAngle = -pi / 2;
     final sweepPerDay = (2 * pi) / totalDays;
@@ -50,15 +49,15 @@ class CycleWheelPainter extends CustomPainter {
     final effectiveDay = (currentCycleDay * animationProgress).clamp(1.0, totalDays.toDouble());
 
     // =========================================================================
-    // PASS 1: Thin base circle track (light gray)
+    // PASS 1: Base circle track (subtle light gray)
     // =========================================================================
     canvas.drawCircle(
       center,
       radius,
       Paint()
-        ..color = theme.inactiveTrackColor.withValues(alpha: 0.5)
+        ..color = theme.inactiveTrackColor.withValues(alpha: 0.45)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+        ..strokeWidth = 2.0,
     );
 
     // =========================================================================
@@ -70,7 +69,7 @@ class CycleWheelPainter extends CustomPainter {
       final y = center.dy + radius * sin(angle);
       canvas.drawCircle(
         Offset(x, y),
-        3.2,
+        3.5,
         Paint()
           ..color = theme.inactiveTrackColor
           ..style = PaintingStyle.fill,
@@ -78,22 +77,21 @@ class CycleWheelPainter extends CustomPainter {
     }
 
     // =========================================================================
-    // PASS 3: Per-phase solid colored arc strokes (the connecting lines)
-    // Draw one arc per phase, clipped to effectiveDay
+    // PASS 3: Seamless continuous per-phase solid colored arc strokes
     // =========================================================================
     final dialRect = Rect.fromCircle(center: center, radius: radius);
     final arcPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
+      ..strokeWidth = 4.5
       ..strokeCap = StrokeCap.round;
 
     for (final phase in _phaseBoundaries) {
-      if (phase.start > effectiveDay) break;
+      if (phase.start >= effectiveDay) break;
 
-      final phaseColor = _getColorForDay(phase.start);
-      final phaseEnd = phase.end.toDouble().clamp(1.0, effectiveDay);
+      final phaseColor = _getPhaseColor(phase.name);
+      final phaseEnd = phase.end.clamp(phase.start, effectiveDay);
 
-      // Arc spans from start of phase day to end of phase day (center-to-center of beads)
+      // Arc spans continuously from phase.start to phaseEnd with zero gaps
       final arcStart = startAngle + (phase.start - 1) * sweepPerDay;
       final arcSweep = ((phaseEnd - phase.start) / totalDays) * (2 * pi);
 
@@ -105,7 +103,6 @@ class CycleWheelPainter extends CustomPainter {
 
     // =========================================================================
     // PASS 4: Phase-colored filled beads on top of the arcs
-    // Skips Day 1 (hollow ring), Day 14 (teal ring), activeDay (badge)
     // =========================================================================
     final animatedDayInt = effectiveDay.ceil();
     for (int day = 2; day <= animatedDayInt; day++) {
@@ -117,12 +114,12 @@ class CycleWheelPainter extends CustomPainter {
       final phaseColor = _getColorForDay(day);
 
       // White backing for crisp edges
-      canvas.drawCircle(Offset(x, y), 5.0, Paint()
+      canvas.drawCircle(Offset(x, y), 5.8, Paint()
         ..color = theme.screenBackground
         ..style = PaintingStyle.fill);
 
       // Phase-colored bead
-      canvas.drawCircle(Offset(x, y), 4.2, Paint()
+      canvas.drawCircle(Offset(x, y), 4.8, Paint()
         ..color = phaseColor
         ..style = PaintingStyle.fill);
     }
@@ -295,9 +292,17 @@ class CycleWheelPainter extends CustomPainter {
   Color _getColorForDay(int day) {
     if (day <= 5) return theme.periodColor;
     if (day <= 10) return theme.growthColor;
-    if (day <= 13) return theme.peakColor;
-    if (day == 14) return theme.ovulationHighlightColor;
+    if (day <= 14) return theme.peakColor;
     return theme.lutealColor;
+  }
+
+  Color _getPhaseColor(String phaseName) {
+    return switch (phaseName.toLowerCase()) {
+      'period' => theme.periodColor,
+      'growth' => theme.growthColor,
+      'peak' => theme.peakColor,
+      _ => theme.lutealColor,
+    };
   }
 
   @override

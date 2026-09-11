@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
 import 'category_circular_dial.dart';
@@ -48,35 +47,9 @@ class _NutritionOverviewSectionState extends State<NutritionOverviewSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Header
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                'Daily Nutrition Focus',
-                style: theme.sectionHeaderStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: theme.cardBackground,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.cardBorder),
-              ),
-              child: Text(
-                'ICMR-NIN RDA',
-                style: GoogleFonts.outfit(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: theme.textSecondary,
-                ),
-              ),
-            ),
-          ],
+        Text(
+          'Daily Nutrition Focus',
+          style: theme.sectionHeaderStyle,
         ),
         const SizedBox(height: 12),
 
