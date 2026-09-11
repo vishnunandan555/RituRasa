@@ -7,7 +7,6 @@ import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
 import 'package:riturasa/presentation/home/widgets/cycle_metric_card.dart';
 import 'package:riturasa/presentation/home/widgets/cycle_wheel.dart';
-import 'package:riturasa/presentation/home/widgets/fertility_window_card.dart';
 import 'package:riturasa/presentation/home/widgets/hydration_card.dart';
 import 'package:riturasa/presentation/home/widgets/nutrition_overview_section.dart';
 import 'package:riturasa/presentation/home/widgets/phase_legend.dart';
@@ -118,7 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             width: 28,
                             height: 28,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.spa_rounded, size: 24),
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.spa_rounded, size: 24),
                           ),
                           const SizedBox(width: 8),
                           Flexible(
@@ -274,24 +273,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   .fadeIn(duration: 240.ms, delay: 80.ms)
                   .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 24),
 
-              // 5. Fertility Window Card (e.g. Fertility Window / High Chance Today / 🔥 Peak)
-              FertilityWindowCard(
-                currentCycleDay: _activeDay,
-                onTap: () {
-                  setState(() {
-                    _activeDay = 12;
-                  });
-                },
-              )
-                  .animate()
-                  .fadeIn(duration: 240.ms, delay: 100.ms)
-                  .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
-
-              const SizedBox(height: 28),
-
-              // 6. Nutrient Tracking Policy: Composite Dial & 3 Sub-Cards
+              // 5. Nutrient Tracking Policy: Composite Dial & 3 Sub-Cards
               NutritionOverviewSection(
                 categories: nutrientCategories,
               )
@@ -319,9 +303,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (day <= 5) {
       return 'Period';
     } else if (day <= 10) {
-      return 'Fertile';
+      return 'Growth';
     } else if (day <= 14) {
-      return day == 14 ? 'Ovulation' : 'Peak';
+      return 'Peak';
     } else {
       return 'Luteal';
     }

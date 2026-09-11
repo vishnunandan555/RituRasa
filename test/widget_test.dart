@@ -26,13 +26,11 @@ void main() {
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('Cycle Day'), findsOneWidget);
     expect(find.text('Period'), findsOneWidget);
-    expect(find.text('Fertile'), findsOneWidget);
+    expect(find.text('Growth'), findsOneWidget);
     expect(find.text('Peak'), findsWidgets);
     expect(find.text('Luteal'), findsOneWidget);
     expect(find.text('Ovulation'), findsOneWidget);
     expect(find.text('Next Period'), findsOneWidget);
-    expect(find.text('Fertility Window'), findsOneWidget);
-    expect(find.text('High Chance Today'), findsOneWidget);
 
     // Verify Navigation bar tabs exist
     expect(find.byType(FloatingPillNavBar), findsOneWidget);

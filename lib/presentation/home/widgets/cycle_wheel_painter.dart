@@ -32,9 +32,9 @@ class CycleWheelPainter extends CustomPainter {
   // Phase boundary days (inclusive end)
   static const _phaseBoundaries = [
     (start: 1, end: 5),   // Period
-    (start: 6, end: 10),  // Fertile
+    (start: 6, end: 10),  // Growth
     (start: 11, end: 13), // Peak
-    (start: 14, end: 14), // Ovulation
+    (start: 14, end: 14), // Ovulation (Peak)
     (start: 15, end: 28), // Luteal
   ];
 

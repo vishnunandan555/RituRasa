@@ -67,7 +67,7 @@ class CycleService {
       return CyclePhaseInfo(
         estimatedCycleDay: cycleDay,
         phaseId: 'menstrual',
-        phaseName: 'Menstrual Phase',
+        phaseName: 'Period Phase',
         description: 'Replenish iron stores and soothe uterine muscle contractions with gentle minerals and hydration.',
         priorityNutrientNames: const ['Iron', 'Vitamin C', 'Magnesium'],
         targetTags: const ['iron', 'vitamin_c', 'magnesium', 'anti_inflammatory'],
@@ -83,7 +83,7 @@ class CycleService {
       return CyclePhaseInfo(
         estimatedCycleDay: cycleDay,
         phaseId: 'follicular',
-        phaseName: 'Follicular Phase',
+        phaseName: 'Growth Phase',
         description: 'Support rising estrogen and cellular energy with clean protein, B-vitamins, and zinc.',
         priorityNutrientNames: const ['Protein', 'Folate (B9)', 'Zinc'],
         targetTags: const ['protein', 'folate', 'zinc'],
@@ -98,7 +98,7 @@ class CycleService {
       return CyclePhaseInfo(
         estimatedCycleDay: cycleDay,
         phaseId: 'ovulatory',
-        phaseName: 'Ovulatory Phase',
+        phaseName: 'Peak Phase',
         description: 'Prioritize antioxidant-rich whole foods, dietary fiber, and adequate hydration during peak estrogen.',
         priorityNutrientNames: const ['Dietary Fiber', 'Zinc', 'Antioxidants'],
         targetTags: const ['fiber', 'zinc', 'antioxidant'],

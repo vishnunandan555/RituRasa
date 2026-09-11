@@ -80,13 +80,13 @@ class _NutritionOverviewSectionState extends State<NutritionOverviewSection> {
         ),
         const SizedBox(height: 12),
 
-        // Main Composite Layout: Circular Ring Left + 3 Sub-Cards Right (Dynamically Scaled)
+        // Main Composite Layout: Circular Ring Left + 3 Sub-Cards Right
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Left: Large Circular Progress Dial (Least Filled / Focused)
             Expanded(
-              flex: 44,
+              flex: 48,
               child: CategoryCircularDial(
                 category: focusedCategory,
                 onTap: () {
@@ -100,15 +100,15 @@ class _NutritionOverviewSectionState extends State<NutritionOverviewSection> {
               ),
             ),
 
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
 
             // Right: 3 Stacked Sub-Cards
             Expanded(
-              flex: 56,
+              flex: 52,
               child: Column(
                 children: [
                   for (int i = 0; i < subCategories.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 6),
+                    if (i > 0) const SizedBox(height: 7),
                     CategorySubCard(
                       category: subCategories[i],
                       onTap: () {

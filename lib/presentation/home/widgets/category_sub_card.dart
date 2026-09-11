@@ -5,7 +5,7 @@ import 'package:riturasa/core/widgets/pressable_scale.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
 
 /// Horizontal pill sub-card matching the stacked items on the right
-/// in the reference screenshot (e.g. Steps 2,532, Readiness 89, Sleep 7h 54m).
+/// in the reference screenshot (e.g. Steps 3,625, Readiness 85, Sleep 7h 14m / 72 • Good).
 class CategorySubCard extends StatelessWidget {
   final NutrientCategoryProgress category;
   final VoidCallback? onTap;
@@ -19,105 +19,128 @@ class CategorySubCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
-    final (tintBg, accentColor, icon) = _getStyling(category.type, theme);
-
+    final (bgLight, bgDark, accentColor, icon) = _getStyling(category.type);
     final isCompact = theme.isCompact;
+    final progressFraction = (category.percentage / 100.0).clamp(0.22, 1.0);
 
     return PressableScale(
       onTap: onTap,
-      child: Container(
-        height: isCompact ? 50 : 54,
-        padding: EdgeInsets.symmetric(horizontal: isCompact ? 8 : 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: tintBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: accentColor.withValues(alpha: 0.15), width: 1.0),
-        ),
-        child: Row(
-          children: [
-            // Left Rounded Icon Badge
-            Container(
-              width: isCompact ? 32 : 36,
-              height: isCompact ? 32 : 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
-                shape: BoxShape.circle,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          height: isCompact ? 50 : 54,
+          color: bgLight,
+          child: Stack(
+            children: [
+              // 1. Subtle Progress Fill Bar (matching the two-tone card in reference)
+              FractionallySizedBox(
+                widthFactor: progressFraction,
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  color: bgDark,
+                ),
               ),
-              child: Icon(
-                icon,
-                color: accentColor,
-                size: isCompact ? 17 : 20,
-              ),
-            ),
-            SizedBox(width: isCompact ? 6 : 10),
 
-            // Middle: Title & Subtitle
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    category.title,
-                    style: GoogleFonts.outfit(
-                      fontSize: isCompact ? 11 : 12,
-                      fontWeight: FontWeight.w600,
-                      color: accentColor.withValues(alpha: 0.9),
+              // 2. Foreground Content (Icon Badge + Title & Value)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: isCompact ? 8 : 10),
+                child: Row(
+                  children: [
+                    // Left White Circular Icon Badge
+                    Container(
+                      width: isCompact ? 32 : 36,
+                      height: isCompact ? 32 : 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        icon,
+                        color: accentColor,
+                        size: isCompact ? 17 : 20,
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    category.details,
-                    style: GoogleFonts.outfit(
-                      fontSize: isCompact ? 9.5 : 10,
-                      fontWeight: FontWeight.w500,
-                      color: theme.textSecondary,
+                    const SizedBox(width: 8),
+
+                    // Title & Value Column
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            category.title,
+                            style: GoogleFonts.outfit(
+                              fontSize: isCompact ? 11 : 12,
+                              fontWeight: FontWeight.w600,
+                              color: accentColor.withValues(alpha: 0.88),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            _getValueString(category),
+                            style: GoogleFonts.outfit(
+                              fontSize: isCompact ? 16 : 18,
+                              fontWeight: FontWeight.w800,
+                              color: accentColor,
+                              height: 1.15,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-
-            const SizedBox(width: 4),
-
-            // Right: Big Progress Number
-            Text(
-              '${category.percentage.toInt()}%',
-              style: GoogleFonts.outfit(
-                fontSize: isCompact ? 15 : 18,
-                fontWeight: FontWeight.w800,
-                color: accentColor,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  (Color, Color, IconData) _getStyling(NutrientCategoryType type, RituRasaThemeExtension theme) {
+  String _getValueString(NutrientCategoryProgress cat) {
+    if (cat.type == NutrientCategoryType.minerals && cat.percentage > 50) {
+      return '${cat.percentage.toInt()} • Good';
+    }
+    return '${cat.percentage.toInt()}%';
+  }
+
+  (Color, Color, Color, IconData) _getStyling(NutrientCategoryType type) {
     return switch (type) {
       NutrientCategoryType.energy => (
-          theme.energySubCardBg,
-          theme.energyCategoryColor,
+          const Color(0xFFDBEAFE), // Light blue
+          const Color(0xFF93C5FD), // Mid blue
+          const Color(0xFF1D4ED8), // Deep blue
           Icons.local_fire_department_rounded,
         ),
       NutrientCategoryType.macro => (
-          theme.macroSubCardBg,
-          theme.macroCategoryColor,
+          const Color(0xFFCCFBF1), // Light teal
+          const Color(0xFF5EEAD4), // Mid teal
+          const Color(0xFF0F766E), // Deep teal
           Icons.egg_alt_rounded,
         ),
       NutrientCategoryType.vitamins => (
-          theme.vitaminsSubCardBg,
-          theme.vitaminsCategoryColor,
+          const Color(0xFFDCFCE7), // Light green
+          const Color(0xFF86EFAC), // Mid green
+          const Color(0xFF166534), // Deep green
           Icons.spa_rounded,
         ),
       NutrientCategoryType.minerals => (
-          theme.mineralsSubCardBg,
-          theme.mineralsCategoryColor,
+          const Color(0xFFF3E8FF), // Light purple
+          const Color(0xFFD8B4FE), // Mid purple
+          const Color(0xFF6B21A8), // Deep purple
           Icons.diamond_outlined,
         ),
     };

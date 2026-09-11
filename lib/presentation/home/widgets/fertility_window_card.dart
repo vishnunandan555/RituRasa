@@ -137,8 +137,8 @@ class FertilityWindowCard extends StatelessWidget {
   ) {
     if (day >= 11 && day <= 14) {
       return (
-        'Fertility Window',
-        'High Chance Today',
+        'Peak Phase',
+        'High Conception Chance Today',
         'Peak',
         Icons.local_fire_department_rounded,
         theme.peakColor,
@@ -149,9 +149,9 @@ class FertilityWindowCard extends StatelessWidget {
       );
     } else if (day >= 6 && day <= 10) {
       return (
-        'Fertile Window',
-        'Moderate Chance Today',
-        'Fertile',
+        'Growth Phase',
+        'Moderate Conception Chance',
+        'Growth',
         Icons.trending_up_rounded,
         theme.growthColor,
         Icons.spa_outlined,
@@ -161,7 +161,7 @@ class FertilityWindowCard extends StatelessWidget {
       );
     } else if (day <= 5) {
       return (
-        'Menstrual Phase',
+        'Period Phase',
         'Low Conception Chance',
         'Period',
         Icons.water_drop_rounded,
