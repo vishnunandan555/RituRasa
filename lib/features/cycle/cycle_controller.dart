@@ -1,0 +1,104 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/di/dependency_providers.dart';
+import '../../core/utils/result.dart';
+import '../../domain/models/cycle.dart';
+import '../../domain/repositories/i_cycle_repository.dart';
+import '../../domain/services/cycle_service.dart';
+
+class CycleStateModel {
+  final CycleRecord? latestRecord;
+  final CycleDayState? currentState;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const CycleStateModel({
+    this.latestRecord,
+    this.currentState,
+    this.isLoading = false,
+    this.errorMessage,
+  });
+
+  CycleStateModel copyWith({
+    CycleRecord? latestRecord,
+    CycleDayState? currentState,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
+    return CycleStateModel(
+      latestRecord: latestRecord ?? this.latestRecord,
+      currentState: currentState ?? this.currentState,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+    );
+  }
+}
+
+class CycleNotifier extends Notifier<CycleStateModel> {
+  late final ICycleRepository _repository;
+  late final CycleService _cycleService;
+
+  @override
+  CycleStateModel build() {
+    _cycleService = ref.watch(cycleServiceProvider);
+    ref.watch(cycleRepositoryProvider).whenData((repo) {
+      _repository = repo;
+      loadCycle();
+    });
+    return const CycleStateModel();
+  }
+
+  Future<void> loadCycle() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    final res = await _repository.getLatestCycleLog();
+    res.fold(
+      onOk: (record) {
+        if (record != null) {
+          final stateRes = _cycleService.calculateCycleState(
+            lastPeriodStart: record.periodStart,
+            cycleLength: record.cycleLength,
+          );
+          state = state.copyWith(
+            latestRecord: record,
+            currentState: stateRes.valueOrNull,
+            isLoading: false,
+          );
+        } else {
+          state = state.copyWith(isLoading: false);
+        }
+      },
+      onErr: (f) {
+        state = state.copyWith(isLoading: false, errorMessage: f.message);
+      },
+    );
+  }
+
+  Future<Result<void>> logPeriodStart(DateTime periodStart, {int cycleLength = 28}) async {
+    state = state.copyWith(isLoading: true);
+    final now = DateTime.now();
+    final record = CycleRecord(
+      id: 'cycle_${now.millisecondsSinceEpoch}',
+      periodStart: periodStart,
+      cycleLength: cycleLength,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final res = await _repository.saveCycleLog(record);
+    if (res.isOk) {
+      final stateRes = _cycleService.calculateCycleState(
+        lastPeriodStart: periodStart,
+        cycleLength: cycleLength,
+      );
+      state = state.copyWith(
+        latestRecord: record,
+        currentState: stateRes.valueOrNull,
+        isLoading: false,
+      );
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: res.failureOrNull?.message);
+    }
+    return res;
+  }
+}
+
+final cycleNotifierProvider = NotifierProvider<CycleNotifier, CycleStateModel>(CycleNotifier.new);

@@ -22,13 +22,19 @@ class KitchenMatchingService {
     for (final recipe in recipes) {
       // Optional diet filter
       if (dietFilter != null && dietFilter.isNotEmpty) {
-        final matchesDiet = recipe.diet.any((d) => d.toLowerCase() == dietFilter.toLowerCase());
+        final normDiet = dietFilter.toLowerCase().replaceAll(' ', '_').replaceAll('-', '_');
+        final matchesDiet = recipe.diet.any((d) {
+          final normD = d.toLowerCase().replaceAll(' ', '_').replaceAll('-', '_');
+          return normD == normDiet;
+        });
         if (!matchesDiet) continue;
       }
 
       // Optional cuisine filter
       if (cuisineFilter != null && cuisineFilter.isNotEmpty) {
-        if (recipe.cuisine?.toLowerCase() != cuisineFilter.toLowerCase()) continue;
+        final normCuisine = cuisineFilter.toLowerCase().replaceAll(' ', '_').replaceAll('-', '_');
+        final recipeCuisine = recipe.cuisine?.toLowerCase().replaceAll(' ', '_').replaceAll('-', '_');
+        if (recipeCuisine != normCuisine) continue;
       }
 
       // Optional meal type filter
