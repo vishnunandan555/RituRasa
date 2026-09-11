@@ -166,7 +166,15 @@ class _AddFoodDialogState extends ConsumerState<AddFoodDialog> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       )
-                    : null,
+                    : (_searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              _onSearchChanged('');
+                            },
+                          )
+                        : null),
                 filled: true,
                 fillColor: theme.screenBackground,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -182,93 +190,138 @@ class _AddFoodDialogState extends ConsumerState<AddFoodDialog> {
             ),
             const SizedBox(height: 12),
 
-            // Food selection display or search results list
-            if (_selectedFood != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _selectedFood!['name']?.toString() ?? '',
-                            style: GoogleFonts.outfit(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: theme.textPrimary,
+            // Food selection display (tap to remove)
+            if (_selectedFood != null) ...[
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  setState(() {
+                    _selectedFood = null;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.35)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _selectedFood!['name']?.toString() ?? '',
+                              style: GoogleFonts.outfit(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: theme.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            _selectedFood!['category']?.toString() ?? 'Staple',
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              color: theme.textSecondary,
+                            Text(
+                              '${_selectedFood!['category']?.toString() ?? 'Staple'} • Tap to remove',
+                              style: GoogleFonts.outfit(
+                                fontSize: 11,
+                                color: const Color(0xFF059669),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 18),
-                      onPressed: () => setState(() => _selectedFood = null),
-                    ),
-                  ],
-                ),
-              )
-            else
-              Expanded(
-                child: _searchResults.isEmpty
-                    ? Center(
-                        child: Text(
-                          _searchController.text.trim().length < 2
-                              ? 'Type at least 2 characters to search foods from the ICMR-NIN database.'
-                              : 'No matching foods found.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.outfit(fontSize: 12.5, color: theme.textSecondary),
+                          ],
                         ),
-                      )
-                    : ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: _searchResults.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final food = _searchResults[index];
-                          final name = food['name']?.toString() ?? '';
-                          final cat = food['category']?.toString() ?? '';
-
-                          return ListTile(
-                            dense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                            title: Text(
-                              name,
-                              style: GoogleFonts.outfit(fontSize: 13.5, fontWeight: FontWeight.w600),
-                            ),
-                            subtitle: Text(
-                              cat,
-                              style: GoogleFonts.outfit(fontSize: 11, color: theme.textSecondary),
-                            ),
-                            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12),
-                            onTap: () {
-                              setState(() {
-                                _selectedFood = food;
-                                _searchResults = [];
-                              });
-                            },
-                          );
-                        },
                       ),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE11D48).withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close_rounded, size: 14, color: Color(0xFFE11D48)),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+              const SizedBox(height: 10),
+            ],
+
+            // Search results list (always browsable)
+            Expanded(
+              child: _searchResults.isEmpty
+                  ? Center(
+                      child: Text(
+                        _searchController.text.trim().length < 2
+                            ? 'Type at least 2 characters to search foods from the ICMR-NIN database.'
+                            : 'No matching foods found.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(fontSize: 12.5, color: theme.textSecondary),
+                      ),
+                    )
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: _searchResults.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final food = _searchResults[index];
+                        final name = food['name']?.toString() ?? '';
+                        final cat = food['category']?.toString() ?? '';
+                        final isSelected = _selectedFood != null &&
+                            (_selectedFood!['id'] == food['id'] || _selectedFood!['name'] == food['name']);
+
+                        return ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          tileColor: isSelected ? const Color(0xFF10B981).withValues(alpha: 0.08) : null,
+                          leading: Icon(
+                            isSelected ? Icons.check_circle_rounded : Icons.circle_outlined,
+                            color: isSelected ? const Color(0xFF10B981) : theme.cardBorder,
+                            size: 18,
+                          ),
+                          title: Text(
+                            name,
+                            style: GoogleFonts.outfit(
+                              fontSize: 13.5,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                              color: isSelected ? const Color(0xFF10B981) : theme.textPrimary,
+                            ),
+                          ),
+                          subtitle: Text(
+                            cat,
+                            style: GoogleFonts.outfit(fontSize: 11, color: theme.textSecondary),
+                          ),
+                          trailing: isSelected
+                              ? const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Remove',
+                                      style: TextStyle(fontSize: 11, color: Color(0xFFE11D48), fontWeight: FontWeight.w600),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Icon(Icons.close_rounded, size: 14, color: Color(0xFFE11D48)),
+                                  ],
+                                )
+                              : const Icon(Icons.add_rounded, size: 18),
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                // Tapping again removes it!
+                                _selectedFood = null;
+                              } else {
+                                _selectedFood = food;
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ),
+            ),
 
             const SizedBox(height: 14),
 

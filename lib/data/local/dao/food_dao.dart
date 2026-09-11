@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import '../../../core/errors/failure.dart';
 import '../../../core/utils/result.dart';
+import '../../../domain/models/food.dart';
 
 /// Data Access Object for Foods in `nutrition_reference.db`.
 class FoodDao {
@@ -151,6 +153,52 @@ class FoodDao {
     } catch (e) {
       return Result.err(DatabaseFailure(
         message: 'Failed to fetch foods by category: $e',
+        cause: e,
+      ));
+    }
+  }
+
+  /// Upsert remote foods into local reference database for offline caching.
+  Future<Result<void>> upsertFoods(List<FoodItem> items) async {
+    try {
+      final batch = db.batch();
+      for (final item in items) {
+        batch.insert(
+          'foods',
+          {
+            'id': item.id,
+            'code': item.code,
+            'name': item.name,
+            'scientific_name': item.scientificName,
+            'category': item.category,
+            'regions_json': jsonEncode(item.regions),
+            'cuisines_json': jsonEncode(item.cuisines),
+            'diet_json': jsonEncode(item.diet),
+            'tags_json': jsonEncode(item.tags),
+            'basis_g': item.basisG,
+            'energy_kcal': item.energyKcal,
+            'protein_g': item.proteinG,
+            'carbohydrate_g': item.carbohydrateG,
+            'fat_g': item.fatG,
+            'fiber_g': item.fiberG,
+            'iron_mg': item.ironMg,
+            'calcium_mg': item.calciumMg,
+            'magnesium_mg': item.magnesiumMg,
+            'zinc_mg': item.zincMg,
+            'potassium_mg': item.potassiumMg,
+            'sodium_mg': item.sodiumMg,
+            'folate_ug': item.folateUg,
+            'vitamin_c_mg': item.vitaminCMg,
+            'vitamin_b6_mg': item.vitaminB6Mg,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+      return const Result.ok(null);
+    } catch (e) {
+      return Result.err(DatabaseFailure(
+        message: 'Failed to cache foods in database: $e',
         cause: e,
       ));
     }

@@ -28,6 +28,9 @@ class FoodRepositoryImpl implements IFoodRepository {
       final remoteResult = await apiService!.searchFoods(query, limit: limit);
       if (remoteResult.isOk) {
         final domainItems = remoteResult.valueOrNull!.map(FoodMapper.toDomain).toList();
+        if (domainItems.isNotEmpty) {
+          await foodDao.upsertFoods(domainItems);
+        }
         return Result.ok(domainItems);
       }
     }
@@ -47,7 +50,9 @@ class FoodRepositoryImpl implements IFoodRepository {
     if (apiService != null) {
       final remoteResult = await apiService!.fetchFood(foodId);
       if (remoteResult.isOk) {
-        return Result.ok(FoodMapper.toDomain(remoteResult.valueOrNull!));
+        final domainItem = FoodMapper.toDomain(remoteResult.valueOrNull!);
+        await foodDao.upsertFoods([domainItem]);
+        return Result.ok(domainItem);
       }
     }
 

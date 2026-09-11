@@ -58,6 +58,37 @@ class IntakeRepositoryImpl implements IIntakeRepository {
   }
 
   @override
+  Future<Result<List<IntakeEntry>>> getDateRangeIntakes(String startDate, String endDate) async {
+    final result = await intakeDao.getDateRangeIntakes(startDate, endDate);
+    return result.map((rows) {
+      return rows.map((r) {
+        final Map<String, double> nutMap = {};
+        try {
+          final decoded = jsonDecode(r['nutrients_json']?.toString() ?? '{}');
+          if (decoded is Map) {
+            decoded.forEach((k, v) {
+              if (v is num) nutMap[k.toString()] = v.toDouble();
+            });
+          }
+        } catch (_) {}
+
+        return IntakeEntry(
+          id: r['id'] as String,
+          date: r['date'] as String,
+          foodId: r['food_id'] as String?,
+          recipeId: r['recipe_id'] as String?,
+          name: r['name'] as String,
+          quantity: (r['quantity'] as num).toDouble(),
+          unit: r['unit'] as String? ?? 'serving',
+          mealType: MealType.fromString(r['meal_type'] as String? ?? 'other'),
+          nutrients: nutMap,
+          loggedAt: DateTime.tryParse(r['logged_at']?.toString() ?? '') ?? DateTime.now(),
+        );
+      }).toList();
+    });
+  }
+
+  @override
   Future<Result<void>> deleteIntake(String id) async {
     return await intakeDao.deleteIntake(id);
   }

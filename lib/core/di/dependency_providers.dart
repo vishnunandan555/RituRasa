@@ -35,6 +35,12 @@ import '../../domain/services/shopping_service.dart';
 import '../../domain/services/sync_service.dart';
 import '../database/database_manager.dart';
 import '../database/initial_data_seeder.dart';
+import '../network/network_info.dart';
+
+// --- Network & Client Providers ---
+final networkInfoProvider = Provider<INetworkInfo>((ref) {
+  return const NetworkInfo();
+});
 
 // --- Database Providers ---
 final databaseManagerProvider = Provider<DatabaseManager>((ref) {

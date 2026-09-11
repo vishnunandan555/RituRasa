@@ -323,13 +323,22 @@ class _QuickFoodLogSheetState extends ConsumerState<QuickFoodLogSheet> {
                             style: GoogleFonts.outfit(fontSize: 11.5, color: theme.textSecondary),
                           ),
                           trailing: isSelected
-                              ? Icon(Icons.check_circle_rounded, color: theme.navBarActivePill, size: 18)
+                              ? const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
+                                    SizedBox(width: 4),
+                                    Icon(Icons.close_rounded, size: 16, color: Color(0xFFE11D48)),
+                                  ],
+                                )
                               : null,
                           onTap: () {
                             setState(() {
-                              _selectedFood = food;
-                              _searchResults = [];
-                              _searchController.text = food.name;
+                              if (isSelected) {
+                                _selectedFood = null;
+                              } else {
+                                _selectedFood = food;
+                              }
                             });
                           },
                         );

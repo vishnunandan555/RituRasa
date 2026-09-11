@@ -3,9 +3,12 @@ class AppConfig {
   AppConfig._();
 
   /// SimpleNutriAPI remote base URL.
-  /// Defaults to localhost for development/local testing.
-  /// In production, can be overridden via dart-define or runtime settings.
-  static const String defaultApiBaseUrl = 'http://127.0.0.1:8000';
+  /// Defaults to production live server on Render.
+  /// Can be overridden via dart-define: --dart-define=API_URL=http://...
+  static const String defaultApiBaseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'https://simplenutri-api.onrender.com',
+  );
   static const String apiVersionPath = '/api/v1';
 
   /// Connect and receive timeouts for HTTP client.
