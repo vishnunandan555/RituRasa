@@ -16,35 +16,41 @@ class PhaseLegend extends StatelessWidget {
     final theme = context.rituTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _LegendItem(
-            color: theme.periodColor,
-            label: 'Period',
-            isActive: activePhase?.toLowerCase() == 'period',
-            theme: theme,
-          ),
-          _LegendItem(
-            color: theme.growthColor,
-            label: 'Growth',
-            isActive: activePhase?.toLowerCase() == 'growth',
-            theme: theme,
-          ),
-          _LegendItem(
-            color: theme.peakColor,
-            label: 'Peak',
-            isActive: activePhase?.toLowerCase() == 'peak' || activePhase?.toLowerCase() == 'ovulation',
-            theme: theme,
-          ),
-          _LegendItem(
-            color: theme.lutealColor,
-            label: 'Luteal',
-            isActive: activePhase?.toLowerCase() == 'luteal',
-            theme: theme,
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _LegendItem(
+              color: theme.periodColor,
+              label: 'Period',
+              isActive: activePhase?.toLowerCase() == 'period',
+              theme: theme,
+            ),
+            const SizedBox(width: 14),
+            _LegendItem(
+              color: theme.growthColor,
+              label: 'Growth',
+              isActive: activePhase?.toLowerCase() == 'growth',
+              theme: theme,
+            ),
+            const SizedBox(width: 14),
+            _LegendItem(
+              color: theme.peakColor,
+              label: 'Peak',
+              isActive: activePhase?.toLowerCase() == 'peak' || activePhase?.toLowerCase() == 'ovulation',
+              theme: theme,
+            ),
+            const SizedBox(width: 14),
+            _LegendItem(
+              color: theme.lutealColor,
+              label: 'Luteal',
+              isActive: activePhase?.toLowerCase() == 'luteal',
+              theme: theme,
+            ),
+          ],
+        ),
       ),
     );
   }

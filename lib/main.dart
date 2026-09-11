@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/riturasa_theme.dart';
-import 'presentation/home/screens/home_screen.dart';
+import 'presentation/navigation/screens/main_shell_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class RituRasaApp extends StatelessWidget {
           RituRasaThemeExtension.light(),
         ],
       ),
-      home: const HomeScreen(),
+      home: const MainShellScreen(),
     );
   }
 }

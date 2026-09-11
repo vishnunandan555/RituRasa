@@ -32,6 +32,20 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   final Color ovulationIconBg;
   final Color nextPeriodIconBg;
 
+  // Navigation Bar Tokens (All-White Theme Equivalent)
+  final Color navBarBackground;
+  final Color navBarBorder;
+  final Color navBarShadow;
+  final Color navBarActivePill;
+  final Color navBarActiveContent;
+  final Color navBarInactiveContent;
+
+  // Chip & Action Tokens
+  final Color chipSelectedBg;
+  final Color chipSelectedText;
+  final Color chipUnselectedBg;
+  final Color chipUnselectedText;
+
   // Typography Styles
   final TextStyle dateHeaderStyle;
   final TextStyle dateTitleStyle;
@@ -43,6 +57,8 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   final TextStyle cardTitleStyle;
   final TextStyle cardPillTextStyle;
   final TextStyle cardSubtitleStyle;
+  final TextStyle screenTitleStyle;
+  final TextStyle screenSubtitleStyle;
 
   const RituRasaThemeExtension({
     required this.periodColor,
@@ -64,6 +80,16 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     required this.pillNextPeriodText,
     required this.ovulationIconBg,
     required this.nextPeriodIconBg,
+    required this.navBarBackground,
+    required this.navBarBorder,
+    required this.navBarShadow,
+    required this.navBarActivePill,
+    required this.navBarActiveContent,
+    required this.navBarInactiveContent,
+    required this.chipSelectedBg,
+    required this.chipSelectedText,
+    required this.chipUnselectedBg,
+    required this.chipUnselectedText,
     required this.dateHeaderStyle,
     required this.dateTitleStyle,
     required this.cycleDayLabelStyle,
@@ -74,9 +100,11 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     required this.cardTitleStyle,
     required this.cardPillTextStyle,
     required this.cardSubtitleStyle,
+    required this.screenTitleStyle,
+    required this.screenSubtitleStyle,
   });
 
-  /// Light theme definition (matches Figma design)
+  /// Light theme definition (All-White Minimalist Aesthetic)
   factory RituRasaThemeExtension.light() {
     return RituRasaThemeExtension(
       // The 4 Core Phase Colors
@@ -105,6 +133,20 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       pillNextPeriodText: const Color(0xFFE11D48),
       ovulationIconBg: const Color(0xFFF3F4F6),
       nextPeriodIconBg: const Color(0xFFFFE4E6),
+
+      // Floating Nav Bar Tokens (White Theme Equivalent)
+      navBarBackground: const Color(0xFFFFFFFF),
+      navBarBorder: const Color(0xFFE5E7EB),
+      navBarShadow: const Color(0x18000000),
+      navBarActivePill: const Color(0xFF18181B), // Crisp obsidian black pill
+      navBarActiveContent: const Color(0xFFFFFFFF), // White icon and label
+      navBarInactiveContent: const Color(0xFF6B7280), // Sleek slate grey
+
+      // Chip Tokens
+      chipSelectedBg: const Color(0xFF18181B),
+      chipSelectedText: const Color(0xFFFFFFFF),
+      chipUnselectedBg: const Color(0xFFF3F4F6),
+      chipUnselectedText: const Color(0xFF4B5563),
 
       // Text Styles
       dateHeaderStyle: GoogleFonts.outfit(
@@ -161,6 +203,17 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
         fontWeight: FontWeight.w500,
         color: const Color(0xFF9CA3AF),
       ),
+      screenTitleStyle: GoogleFonts.outfit(
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF111827),
+        letterSpacing: -0.3,
+      ),
+      screenSubtitleStyle: GoogleFonts.outfit(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: const Color(0xFF6B7280),
+      ),
     );
   }
 
@@ -185,6 +238,16 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     Color? pillNextPeriodText,
     Color? ovulationIconBg,
     Color? nextPeriodIconBg,
+    Color? navBarBackground,
+    Color? navBarBorder,
+    Color? navBarShadow,
+    Color? navBarActivePill,
+    Color? navBarActiveContent,
+    Color? navBarInactiveContent,
+    Color? chipSelectedBg,
+    Color? chipSelectedText,
+    Color? chipUnselectedBg,
+    Color? chipUnselectedText,
     TextStyle? dateHeaderStyle,
     TextStyle? dateTitleStyle,
     TextStyle? cycleDayLabelStyle,
@@ -195,13 +258,16 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     TextStyle? cardTitleStyle,
     TextStyle? cardPillTextStyle,
     TextStyle? cardSubtitleStyle,
+    TextStyle? screenTitleStyle,
+    TextStyle? screenSubtitleStyle,
   }) {
     return RituRasaThemeExtension(
       periodColor: periodColor ?? this.periodColor,
       growthColor: growthColor ?? this.growthColor,
       peakColor: peakColor ?? this.peakColor,
       lutealColor: lutealColor ?? this.lutealColor,
-      ovulationHighlightColor: ovulationHighlightColor ?? this.ovulationHighlightColor,
+      ovulationHighlightColor:
+          ovulationHighlightColor ?? this.ovulationHighlightColor,
       screenBackground: screenBackground ?? this.screenBackground,
       cardBackground: cardBackground ?? this.cardBackground,
       cardBorder: cardBorder ?? this.cardBorder,
@@ -216,6 +282,17 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       pillNextPeriodText: pillNextPeriodText ?? this.pillNextPeriodText,
       ovulationIconBg: ovulationIconBg ?? this.ovulationIconBg,
       nextPeriodIconBg: nextPeriodIconBg ?? this.nextPeriodIconBg,
+      navBarBackground: navBarBackground ?? this.navBarBackground,
+      navBarBorder: navBarBorder ?? this.navBarBorder,
+      navBarShadow: navBarShadow ?? this.navBarShadow,
+      navBarActivePill: navBarActivePill ?? this.navBarActivePill,
+      navBarActiveContent: navBarActiveContent ?? this.navBarActiveContent,
+      navBarInactiveContent:
+          navBarInactiveContent ?? this.navBarInactiveContent,
+      chipSelectedBg: chipSelectedBg ?? this.chipSelectedBg,
+      chipSelectedText: chipSelectedText ?? this.chipSelectedText,
+      chipUnselectedBg: chipUnselectedBg ?? this.chipUnselectedBg,
+      chipUnselectedText: chipUnselectedText ?? this.chipUnselectedText,
       dateHeaderStyle: dateHeaderStyle ?? this.dateHeaderStyle,
       dateTitleStyle: dateTitleStyle ?? this.dateTitleStyle,
       cycleDayLabelStyle: cycleDayLabelStyle ?? this.cycleDayLabelStyle,
@@ -226,6 +303,8 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       cardTitleStyle: cardTitleStyle ?? this.cardTitleStyle,
       cardPillTextStyle: cardPillTextStyle ?? this.cardPillTextStyle,
       cardSubtitleStyle: cardSubtitleStyle ?? this.cardSubtitleStyle,
+      screenTitleStyle: screenTitleStyle ?? this.screenTitleStyle,
+      screenSubtitleStyle: screenSubtitleStyle ?? this.screenSubtitleStyle,
     );
   }
 
@@ -246,26 +325,57 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       cardBackground: Color.lerp(cardBackground, other.cardBackground, t)!,
       cardBorder: Color.lerp(cardBorder, other.cardBorder, t)!,
       cardShadow: Color.lerp(cardShadow, other.cardShadow, t)!,
-      inactiveTrackColor: Color.lerp(inactiveTrackColor, other.inactiveTrackColor, t)!,
+      inactiveTrackColor:
+          Color.lerp(inactiveTrackColor, other.inactiveTrackColor, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
       pillOvulationBg: Color.lerp(pillOvulationBg, other.pillOvulationBg, t)!,
-      pillOvulationText: Color.lerp(pillOvulationText, other.pillOvulationText, t)!,
+      pillOvulationText:
+          Color.lerp(pillOvulationText, other.pillOvulationText, t)!,
       pillNextPeriodBg: Color.lerp(pillNextPeriodBg, other.pillNextPeriodBg, t)!,
-      pillNextPeriodText: Color.lerp(pillNextPeriodText, other.pillNextPeriodText, t)!,
+      pillNextPeriodText:
+          Color.lerp(pillNextPeriodText, other.pillNextPeriodText, t)!,
       ovulationIconBg: Color.lerp(ovulationIconBg, other.ovulationIconBg, t)!,
-      nextPeriodIconBg: Color.lerp(nextPeriodIconBg, other.nextPeriodIconBg, t)!,
+      nextPeriodIconBg:
+          Color.lerp(nextPeriodIconBg, other.nextPeriodIconBg, t)!,
+      navBarBackground:
+          Color.lerp(navBarBackground, other.navBarBackground, t)!,
+      navBarBorder: Color.lerp(navBarBorder, other.navBarBorder, t)!,
+      navBarShadow: Color.lerp(navBarShadow, other.navBarShadow, t)!,
+      navBarActivePill:
+          Color.lerp(navBarActivePill, other.navBarActivePill, t)!,
+      navBarActiveContent:
+          Color.lerp(navBarActiveContent, other.navBarActiveContent, t)!,
+      navBarInactiveContent:
+          Color.lerp(navBarInactiveContent, other.navBarInactiveContent, t)!,
+      chipSelectedBg: Color.lerp(chipSelectedBg, other.chipSelectedBg, t)!,
+      chipSelectedText:
+          Color.lerp(chipSelectedText, other.chipSelectedText, t)!,
+      chipUnselectedBg:
+          Color.lerp(chipUnselectedBg, other.chipUnselectedBg, t)!,
+      chipUnselectedText:
+          Color.lerp(chipUnselectedText, other.chipUnselectedText, t)!,
       dateHeaderStyle: TextStyle.lerp(dateHeaderStyle, other.dateHeaderStyle, t)!,
       dateTitleStyle: TextStyle.lerp(dateTitleStyle, other.dateTitleStyle, t)!,
-      cycleDayLabelStyle: TextStyle.lerp(cycleDayLabelStyle, other.cycleDayLabelStyle, t)!,
-      cycleDayLargeStyle: TextStyle.lerp(cycleDayLargeStyle, other.cycleDayLargeStyle, t)!,
-      cycleDayTotalStyle: TextStyle.lerp(cycleDayTotalStyle, other.cycleDayTotalStyle, t)!,
-      cyclePhaseLabelStyle: TextStyle.lerp(cyclePhaseLabelStyle, other.cyclePhaseLabelStyle, t)!,
+      cycleDayLabelStyle:
+          TextStyle.lerp(cycleDayLabelStyle, other.cycleDayLabelStyle, t)!,
+      cycleDayLargeStyle:
+          TextStyle.lerp(cycleDayLargeStyle, other.cycleDayLargeStyle, t)!,
+      cycleDayTotalStyle:
+          TextStyle.lerp(cycleDayTotalStyle, other.cycleDayTotalStyle, t)!,
+      cyclePhaseLabelStyle:
+          TextStyle.lerp(cyclePhaseLabelStyle, other.cyclePhaseLabelStyle, t)!,
       legendTextStyle: TextStyle.lerp(legendTextStyle, other.legendTextStyle, t)!,
       cardTitleStyle: TextStyle.lerp(cardTitleStyle, other.cardTitleStyle, t)!,
-      cardPillTextStyle: TextStyle.lerp(cardPillTextStyle, other.cardPillTextStyle, t)!,
-      cardSubtitleStyle: TextStyle.lerp(cardSubtitleStyle, other.cardSubtitleStyle, t)!,
+      cardPillTextStyle:
+          TextStyle.lerp(cardPillTextStyle, other.cardPillTextStyle, t)!,
+      cardSubtitleStyle:
+          TextStyle.lerp(cardSubtitleStyle, other.cardSubtitleStyle, t)!,
+      screenTitleStyle:
+          TextStyle.lerp(screenTitleStyle, other.screenTitleStyle, t)!,
+      screenSubtitleStyle:
+          TextStyle.lerp(screenSubtitleStyle, other.screenSubtitleStyle, t)!,
     );
   }
 }
@@ -274,5 +384,6 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
 /// theme styles with `context.rituTheme`.
 extension RituRasaThemeContext on BuildContext {
   RituRasaThemeExtension get rituTheme =>
-      Theme.of(this).extension<RituRasaThemeExtension>() ?? RituRasaThemeExtension.light();
+      Theme.of(this).extension<RituRasaThemeExtension>() ??
+      RituRasaThemeExtension.light();
 }
