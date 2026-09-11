@@ -3,10 +3,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:riturasa/core/di/dependency_providers.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/domain/models/intake_entry.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
+import 'package:riturasa/domain/models/recommendation.dart';
+import 'package:riturasa/features/cycle/cycle_controller.dart';
 import 'package:riturasa/features/intake/intake_controller.dart';
+import 'package:riturasa/features/nutrition/recommendation_controller.dart';
 import 'package:riturasa/features/shopping/shopping_controller.dart';
 import 'package:riturasa/presentation/eat/widgets/quick_food_log_sheet.dart';
 import 'package:riturasa/presentation/eat/widgets/recipe_detail_sheet.dart';
@@ -28,8 +32,46 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  // Default interactive day initialized to 12 (Peak/Ovulatory window)
   int _activeDay = 12;
+  int _hydrationMl = 1250;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHydration();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentDay = ref.read(cycleNotifierProvider).currentState?.currentCycleDay;
+      if (currentDay != null && mounted) {
+        setState(() => _activeDay = currentDay);
+      }
+    });
+  }
+
+  Future<void> _loadHydration() async {
+    try {
+      final dao = await ref.read(syncMetadataDaoProvider.future);
+      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+      final key = 'hydration_glasses_$todayStr';
+      final res = await dao.getMetadata(key);
+      final glasses = int.tryParse(res.valueOrNull ?? '5') ?? 5;
+      if (mounted) {
+        setState(() {
+          _hydrationMl = glasses * 250;
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _onHydrationChanged(int ml) async {
+    setState(() => _hydrationMl = ml);
+    final glasses = (ml / 250).round();
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+    final key = 'hydration_glasses_$todayStr';
+    try {
+      final dao = await ref.read(syncMetadataDaoProvider.future);
+      await dao.setMetadata(key, glasses.toString());
+    } catch (_) {}
+  }
 
   List<NutrientCategoryProgress> _buildNutrientCategories() {
     return const [
@@ -98,7 +140,74 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  void _openSuggestedMeal() {
+  void _openSuggestedMeal([RankedRecipeItem? topRanked]) {
+    if (topRanked != null) {
+      final r = topRanked.recipe;
+      final cal = r.nutritionPerServing['energy_kcal']?.round() ?? 280;
+      final pro = '${(r.nutritionPerServing['protein_g'] ?? 16.0).toStringAsFixed(0)}g';
+      final iron = '${(r.nutritionPerServing['iron_mg'] ?? 4.8).toStringAsFixed(1)} mg';
+      final calc = '${(r.nutritionPerServing['calcium_mg'] ?? 140.0).toStringAsFixed(0)} mg';
+      final fib = '${(r.nutritionPerServing['fiber_g'] ?? 8.0).toStringAsFixed(0)}g';
+
+      final totalCount = r.ingredients.length;
+      final availCount = topRanked.matchedCount;
+
+      RecipeDetailSheet.show(
+        context,
+        recipe: {
+          'id': r.id,
+          'name': r.name,
+          'region': r.region ?? 'Ayurvedic',
+          'cuisine': r.cuisine ?? 'Indian',
+          'mealType': r.mealType.isNotEmpty ? r.mealType.first : 'Main Meal',
+          'time': '${(r.cookTimeMin ?? 20) + (r.prepTimeMin ?? 10)} mins',
+          'servings': '${r.servings ?? 2} servings',
+          'availableCount': availCount,
+          'totalIngredients': totalCount,
+          'match': '${topRanked.matchPercentage.round()}% Kitchen Match',
+          'badge': 'Phase Recommended',
+          'why': r.description ?? 'Curated for biological phase nutrient priorities.',
+          'calories': '$cal kcal',
+          'protein': pro,
+          'iron': iron,
+          'calcium': calc,
+          'fiber': fib,
+          'ingredients': r.ingredients.map((ing) {
+            return {
+              'name': ing.foodName ?? ing.foodId,
+              'qty': '${ing.quantity % 1 == 0 ? ing.quantity.toInt() : ing.quantity} ${ing.unit}',
+              'inKitchen': true,
+            };
+          }).toList(),
+          'instructions': r.instructions.isNotEmpty
+              ? r.instructions
+              : ['Cook wholesome fresh ingredients, temper gently with ghee and cumin, serve warm.'],
+        },
+        onAteThis: () {
+          ref.read(intakeNotifierProvider.notifier).logMeal(
+                recipeId: r.id,
+                name: r.name,
+                quantity: 1.0,
+                unit: 'serving',
+                mealType: MealType.lunch,
+                nutrients: r.nutritionPerServing,
+              );
+        },
+        onAddToCart: () {
+          for (final missing in topRanked.missingIngredients) {
+            ref.read(shoppingNotifierProvider.notifier).addItem(
+                  foodId: missing.foodId,
+                  name: missing.foodName ?? missing.foodId,
+                  quantity: missing.quantity,
+                  unit: missing.unit,
+                  sourceRecipeIds: [r.id],
+                );
+          }
+        },
+      );
+      return;
+    }
+
     RecipeDetailSheet.show(
       context,
       recipe: {
@@ -172,11 +281,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final dateDisplayString = '$monthName $dayNum, $weekdayName';
 
     // Cycle stats
-    final totalCycleDays = 28;
+    final cycleState = ref.watch(cycleNotifierProvider);
+    final totalCycleDays = cycleState.latestRecord?.cycleLength ?? 28;
     final activePhaseName = _getPhaseNameForDay(_activeDay);
 
-    final nutrientCategories = _buildNutrientCategories();
+    final intakeState = ref.watch(intakeNotifierProvider);
+    final progressService = ref.watch(nutritionProgressServiceProvider);
+    final nutrientCategories = intakeState.progressSummary != null
+        ? progressService.calculateCategoryBreakdown(intakeState.progressSummary!)
+        : _buildNutrientCategories();
     final nutritionFocus = _getNutritionFocusForPhase(activePhaseName);
+
+    final recState = ref.watch(recommendationNotifierProvider);
+    final topRanked = recState.result?.rankedRecipes.firstOrNull;
+    final topRecipe = topRanked?.recipe;
+    final suggestedMealName = topRecipe?.name ?? 'Spinach Moong Dal';
+    final suggestedMealWhy = topRecipe?.description ??
+        'Rich in iron and light plant protein for $activePhaseName phase.';
+    final suggestedMealMatch = topRanked != null
+        ? '${topRanked.matchPercentage.round()}% Match'
+        : '94% Match';
 
     return Scaffold(
       backgroundColor: theme.screenBackground,
@@ -226,17 +350,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    InkWell(
+                                 InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        showAboutDialog(
-                          context: context,
-                          applicationName: 'RituRasa',
-                          applicationVersion: '1.0.0',
-                          applicationIcon: Image.asset('assets/images/logo.png', width: 44, height: 44),
-                          applicationLegalese: '© 2026 RituRasa\nAyurvedic Cycle & Nutrition Engine.',
-                        );
+                      onTap: () async {
+                        try {
+                          final sync = await ref.read(syncServiceProvider.future);
+                          final updateRes = await sync.isUpdateAvailable();
+                          final hasUpdate = updateRes.valueOrNull ?? false;
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  hasUpdate
+                                      ? 'New nutritional data available on SimpleNutri API.'
+                                      : 'Nutritional reference database is up to date (100% offline ready).',
+                                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 13),
+                                ),
+                                backgroundColor: const Color(0xFF1E293B),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        } catch (_) {}
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -374,7 +509,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            '94% Match',
+                            suggestedMealMatch,
                             style: GoogleFonts.outfit(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -392,7 +527,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Spinach Moong Dal',
+                                suggestedMealName,
                                 style: GoogleFonts.outfit(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w800,
@@ -401,7 +536,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Rich in iron and light plant protein for $activePhaseName phase.',
+                                suggestedMealWhy,
                                 style: GoogleFonts.outfit(
                                   fontSize: 12,
                                   color: theme.textSecondary,
@@ -414,7 +549,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
-                          onPressed: _openSuggestedMeal,
+                          onPressed: () => _openSuggestedMeal(topRanked),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: theme.navBarActivePill,
                             foregroundColor: Colors.white,
@@ -542,7 +677,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
 
               // 7. Standalone Hydration (Water) Card
-              const HydrationCard()
+              HydrationCard(
+                initialIntakeMl: _hydrationMl,
+                onIntakeChanged: _onHydrationChanged,
+              )
                   .animate()
                   .fadeIn(duration: 250.ms, delay: 140.ms)
                   .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
