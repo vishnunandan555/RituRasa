@@ -1,264 +1,160 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
-
-/// Item model for the Cart / Shopping List
-class CartItem {
-  final String id;
-  final String name;
-  final String quantity;
-  final String category;
-  final String sourceRecipe;
-  bool isCompleted;
-
-  CartItem({
-    required this.id,
-    required this.name,
-    required this.quantity,
-    required this.category,
-    required this.sourceRecipe,
-    this.isCompleted = false,
-  });
-}
+import 'package:riturasa/domain/models/shopping_item.dart';
+import 'package:riturasa/features/kitchen/kitchen_controller.dart';
+import 'package:riturasa/features/shopping/shopping_controller.dart';
 
 /// Cart (Shopping List) Screen conforming to nutrition_flutter_ui_5_screen_srs.md.
 /// Closes the loop from Recipe recommendations -> Shopping -> Kitchen pantry.
-class CartScreen extends StatefulWidget {
+class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
+  ConsumerState<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends State<CartScreen> {
-  final List<CartItem> _items = [
-    CartItem(
-      id: '1',
-      name: 'Fresh Palak (Spinach)',
-      quantity: '2 bunches',
-      category: 'Vegetables',
-      sourceRecipe: 'Spinach Moong Dal',
-    ),
-    CartItem(
-      id: '2',
-      name: 'Yellow Moong Dal (Split)',
-      quantity: '500 g',
-      category: 'Protein & Staples',
-      sourceRecipe: 'Spinach Moong Dal',
-    ),
-    CartItem(
-      id: '3',
-      name: 'Curry Leaves (Kadi Patta)',
-      quantity: '1 bunch',
-      category: 'Vegetables',
-      sourceRecipe: 'Kadhi Pakora & Dal Tadka',
-    ),
-    CartItem(
-      id: '4',
-      name: 'Organic White Sesame Seeds (Til)',
-      quantity: '250 g',
-      category: 'Seeds & Superfoods',
-      sourceRecipe: 'Til Ladoo & Luteal Seed Cycling',
-      isCompleted: true,
-    ),
-    CartItem(
-      id: '5',
-      name: 'A2 Desi Cow Ghee',
-      quantity: '500 ml',
-      category: 'Dairy & Rasayanas',
-      sourceRecipe: 'Ojas Vitality Bowl',
-    ),
-    CartItem(
-      id: '6',
-      name: 'Sprouted Ragi Flour (Finger Millet)',
-      quantity: '1 kg',
-      category: 'Protein & Staples',
-      sourceRecipe: 'Ragi Malt & Porridge',
-      isCompleted: true,
-    ),
-  ];
-
-  void _toggleItem(CartItem item) {
-    setState(() {
-      item.isCompleted = !item.isCompleted;
-    });
-  }
-
-  void _addNewItem(String name, String qty, String category) {
-    if (name.trim().isEmpty) return;
-    setState(() {
-      _items.insert(
-        0,
-        CartItem(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: name.trim(),
-          quantity: qty.trim().isEmpty ? '1 item' : qty.trim(),
-          category: category,
-          sourceRecipe: 'Manual Entry',
-        ),
-      );
-    });
-  }
-
-  void _showAddItemDialog(RituRasaThemeData theme) {
+class _CartScreenState extends ConsumerState<CartScreen> {
+  void _showAddItemDialog(RituRasaThemeExtension theme) {
     final nameController = TextEditingController();
-    final qtyController = TextEditingController();
-    String selectedCategory = 'Vegetables';
-    final categories = ['Vegetables', 'Protein & Staples', 'Seeds & Superfoods', 'Dairy & Rasayanas', 'Spices & Herbs'];
+    final qtyController = TextEditingController(text: '1');
+    final unitController = TextEditingController(text: 'units');
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(ctx).viewInsets.bottom,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: theme.cardBackground,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                  border: Border.all(color: theme.cardBorder),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border.all(color: theme.cardBorder),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Add to Shopping List',
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: theme.textPrimary,
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.close, color: theme.textSecondary),
-                          onPressed: () => Navigator.pop(ctx),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: nameController,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        labelText: 'Item Name (e.g. Tomatoes, Ashwagandha)',
-                        labelStyle: GoogleFonts.outfit(color: theme.textSecondary, fontSize: 13),
-                        filled: true,
-                        fillColor: theme.surfaceContainer,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.cardBorder),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: theme.cardBorder),
-                        ),
+                    Text(
+                      'Add to Shopping List',
+                      style: GoogleFonts.outfit(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: theme.textPrimary,
                       ),
-                      style: GoogleFonts.outfit(fontSize: 14, color: theme.textPrimary),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: qtyController,
-                            decoration: InputDecoration(
-                              labelText: 'Qty (e.g. 500g, 2 bunches)',
-                              labelStyle: GoogleFonts.outfit(color: theme.textSecondary, fontSize: 13),
-                              filled: true,
-                              fillColor: theme.surfaceContainer,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: theme.cardBorder),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: theme.cardBorder),
-                              ),
-                            ),
-                            style: GoogleFonts.outfit(fontSize: 14, color: theme.textPrimary),
+                    IconButton(
+                      icon: Icon(Icons.close, color: theme.textSecondary),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: 'Item Name (e.g. Tomatoes, Ghee, Palak)',
+                    labelStyle: GoogleFonts.outfit(color: theme.textSecondary, fontSize: 13),
+                    filled: true,
+                    fillColor: theme.screenBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: theme.cardBorder),
+                    ),
+                  ),
+                  style: GoogleFonts.outfit(fontSize: 14, color: theme.textPrimary),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: TextField(
+                        controller: qtyController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: 'Qty',
+                          labelStyle: GoogleFonts.outfit(color: theme.textSecondary, fontSize: 13),
+                          filled: true,
+                          fillColor: theme.screenBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: theme.cardBorder),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            initialValue: selectedCategory,
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              labelText: 'Category',
-                              labelStyle: GoogleFonts.outfit(color: theme.textSecondary, fontSize: 13),
-                              filled: true,
-                              fillColor: theme.surfaceContainer,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: theme.cardBorder),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: theme.cardBorder),
-                              ),
-                            ),
-                            items: categories.map((c) {
-                              return DropdownMenuItem(
-                                value: c,
-                                child: Text(
-                                  c,
-                                  style: GoogleFonts.outfit(fontSize: 13, color: theme.textPrimary),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setModalState(() => selectedCategory = val);
-                              }
-                            },
+                        style: GoogleFonts.outfit(fontSize: 14, color: theme.textPrimary),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 5,
+                      child: TextField(
+                        controller: unitController,
+                        decoration: InputDecoration(
+                          labelText: 'Unit (g, kg, ml, bunches)',
+                          labelStyle: GoogleFonts.outfit(color: theme.textSecondary, fontSize: 13),
+                          filled: true,
+                          fillColor: theme.screenBackground,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: theme.cardBorder),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.navBarActivePill,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        onPressed: () {
-                          _addNewItem(nameController.text, qtyController.text, selectedCategory);
-                          Navigator.pop(ctx);
-                        },
-                        child: Text(
-                          'Add to Cart',
-                          style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 15),
-                        ),
+                        style: GoogleFonts.outfit(fontSize: 14, color: theme.textPrimary),
                       ),
                     ),
                   ],
                 ),
-              ),
-            );
-          },
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.navBarActivePill,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () {
+                      final name = nameController.text.trim();
+                      final qty = double.tryParse(qtyController.text.trim()) ?? 1.0;
+                      final unit = unitController.text.trim().isEmpty ? 'units' : unitController.text.trim();
+                      if (name.isNotEmpty) {
+                        ref.read(shoppingNotifierProvider.notifier).addItem(
+                              foodId: 'food_${DateTime.now().millisecondsSinceEpoch}',
+                              name: name,
+                              quantity: qty,
+                              unit: unit,
+                            );
+                      }
+                      Navigator.pop(ctx);
+                    },
+                    child: Text(
+                      'Add to Cart',
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 15),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
   }
 
-  void _transferToKitchen() {
-    final completedItems = _items.where((i) => i.isCompleted).toList();
+  Future<void> _transferToKitchen(List<ShoppingListItem> completedItems) async {
     if (completedItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -274,43 +170,49 @@ class _CartScreenState extends State<CartScreen> {
       return;
     }
 
-    setState(() {
-      _items.removeWhere((i) => i.isCompleted);
-    });
+    for (final item in completedItems) {
+      await ref.read(kitchenNotifierProvider.notifier).addItem(
+            foodId: item.foodId.isNotEmpty ? item.foodId : 'k_food_${DateTime.now().millisecondsSinceEpoch}',
+            foodName: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+          );
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_outline, color: Color(0xFF10B981), size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Added ${completedItems.length} purchased items to your Kitchen pantry!',
-                style: GoogleFonts.outfit(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+    await ref.read(shoppingNotifierProvider.notifier).clearChecked();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_outline, color: Color(0xFF10B981), size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Added ${completedItems.length} purchased items to your Kitchen pantry!',
+                  style: GoogleFonts.outfit(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          backgroundColor: const Color(0xFF1E293B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 3),
         ),
-        backgroundColor: const Color(0xFF1E293B),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
-    final pendingItems = _items.where((i) => !i.isCompleted).toList();
-    final completedItems = _items.where((i) => i.isCompleted).toList();
+    final shoppingState = ref.watch(shoppingNotifierProvider);
+    final items = shoppingState.items;
 
-    // Group pending items by category
-    final Map<String, List<CartItem>> groupedPending = {};
-    for (final item in pendingItems) {
-      groupedPending.putIfAbsent(item.category, () => []).add(item);
-    }
+    final pendingItems = items.where((i) => !i.isChecked).toList();
+    final completedItems = items.where((i) => i.isChecked).toList();
 
     return Scaffold(
       backgroundColor: theme.screenBackground,
@@ -426,7 +328,7 @@ class _CartScreenState extends State<CartScreen> {
 
               const SizedBox(height: 20),
 
-              // Grouped Pending Items
+              // Pending Items
               if (pendingItems.isEmpty && completedItems.isEmpty)
                 Center(
                   child: Padding(
@@ -450,11 +352,11 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                 )
               else ...[
-                for (final entry in groupedPending.entries) ...[
+                if (pendingItems.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8, top: 4),
                     child: Text(
-                      entry.key,
+                      'Pantry Items to Buy (${pendingItems.length})',
                       style: GoogleFonts.outfit(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
@@ -466,10 +368,10 @@ class _CartScreenState extends State<CartScreen> {
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: entry.value.length,
+                    itemCount: pendingItems.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, idx) {
-                      final item = entry.value[idx];
+                      final item = pendingItems[idx];
                       return _buildCartItemTile(theme, item);
                     },
                   ),
@@ -496,7 +398,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       const SizedBox(width: 8),
                       TextButton.icon(
-                        onPressed: _transferToKitchen,
+                        onPressed: () => _transferToKitchen(completedItems),
                         icon: const Icon(Icons.input_rounded, size: 15),
                         label: Text(
                           'Move to Kitchen',
@@ -532,7 +434,7 @@ class _CartScreenState extends State<CartScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: _transferToKitchen,
+                      onPressed: () => _transferToKitchen(completedItems),
                       icon: const Icon(Icons.kitchen_outlined, size: 18),
                       label: Text(
                         'Add purchased items to Kitchen',
@@ -556,19 +458,23 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildCartItemTile(RituRasaThemeData theme, CartItem item) {
+  Widget _buildCartItemTile(RituRasaThemeExtension theme, ShoppingListItem item) {
+    final qtyDisplay = item.quantity % 1 == 0 ? item.quantity.toInt().toString() : item.quantity.toStringAsFixed(1);
+
     return GestureDetector(
-      onTap: () => _toggleItem(item),
+      onTap: () {
+        ref.read(shoppingNotifierProvider.notifier).toggleChecked(item.id, !item.isChecked);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: item.isCompleted
+          color: item.isChecked
               ? theme.cardBackground.withValues(alpha: 0.6)
               : theme.cardBackground,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: item.isCompleted ? theme.cardBorder.withValues(alpha: 0.6) : theme.cardBorder,
+            color: item.isChecked ? theme.cardBorder.withValues(alpha: 0.6) : theme.cardBorder,
             width: 1.1,
           ),
         ),
@@ -580,13 +486,13 @@ class _CartScreenState extends State<CartScreen> {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: item.isCompleted ? theme.navBarActivePill : Colors.white,
+                color: item.isChecked ? theme.navBarActivePill : Colors.white,
                 border: Border.all(
-                  color: item.isCompleted ? theme.navBarActivePill : theme.cardBorder,
+                  color: item.isChecked ? theme.navBarActivePill : theme.cardBorder,
                   width: 2,
                 ),
               ),
-              child: item.isCompleted
+              child: item.isChecked
                   ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
                   : null,
             ),
@@ -600,8 +506,8 @@ class _CartScreenState extends State<CartScreen> {
                     style: GoogleFonts.outfit(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: item.isCompleted ? theme.textMuted : theme.textPrimary,
-                      decoration: item.isCompleted ? TextDecoration.lineThrough : TextDecoration.none,
+                      color: item.isChecked ? theme.textMuted : theme.textPrimary,
+                      decoration: item.isChecked ? TextDecoration.lineThrough : TextDecoration.none,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -611,7 +517,7 @@ class _CartScreenState extends State<CartScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          item.quantity,
+                          '$qtyDisplay ${item.unit}',
                           style: GoogleFonts.outfit(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -627,7 +533,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       Flexible(
                         child: Text(
-                          'Needed for: ${item.sourceRecipe}',
+                          item.sourceRecipeIds.isNotEmpty ? 'Needed for Recipe' : 'Kitchen Grocery',
                           style: GoogleFonts.outfit(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -647,9 +553,7 @@ class _CartScreenState extends State<CartScreen> {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
               onPressed: () {
-                setState(() {
-                  _items.removeWhere((i) => i.id == item.id);
-                });
+                ref.read(shoppingNotifierProvider.notifier).deleteItem(item.id);
               },
             ),
           ],

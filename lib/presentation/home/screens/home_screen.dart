@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
+import 'package:riturasa/domain/models/intake_entry.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
+import 'package:riturasa/features/intake/intake_controller.dart';
+import 'package:riturasa/features/shopping/shopping_controller.dart';
+import 'package:riturasa/presentation/eat/widgets/quick_food_log_sheet.dart';
 import 'package:riturasa/presentation/eat/widgets/recipe_detail_sheet.dart';
 import 'package:riturasa/presentation/home/widgets/cycle_wheel.dart';
 import 'package:riturasa/presentation/home/widgets/cycle_window_card.dart';
@@ -127,6 +131,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           'Pour in the cooked dal, season with pink salt, and simmer for 5-7 minutes.',
           'Turn off flame and squeeze fresh lemon juice to maximize iron bioavailability.',
         ],
+      },
+      onAteThis: () {
+        ref.read(intakeNotifierProvider.notifier).logMeal(
+              recipeId: 'rec_spinach_moong_dal',
+              name: 'Spinach Moong Dal',
+              quantity: 1.0,
+              unit: 'serving',
+              mealType: MealType.lunch,
+              nutrients: {
+                'energy_kcal': 280.0,
+                'protein_g': 16.0,
+                'iron_mg': 4.8,
+                'calcium_mg': 140.0,
+                'fiber_g': 8.0,
+              },
+            );
+      },
+      onAddToCart: () {
+        ref.read(shoppingNotifierProvider.notifier).addItem(
+              foodId: 'food_lemon_juice',
+              name: 'Fresh Lemon Juice',
+              quantity: 1.0,
+              unit: 'tbsp',
+              sourceRecipeIds: ['rec_spinach_moong_dal'],
+            );
       },
     );
   }
@@ -481,18 +510,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     theme,
                     icon: Icons.edit_note_rounded,
                     label: 'Log Food',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Quick Food Logging: Choose a recipe or mark meal in Eat tab.',
-                            style: GoogleFonts.outfit(color: Colors.white, fontSize: 13),
-                          ),
-                          backgroundColor: const Color(0xFF1E293B),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                    onTap: () => QuickFoodLogSheet.show(context),
                   ),
                   const SizedBox(width: 8),
                   _buildQuickActionBtn(

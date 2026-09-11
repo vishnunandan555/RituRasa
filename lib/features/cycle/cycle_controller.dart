@@ -72,12 +72,20 @@ class CycleNotifier extends Notifier<CycleStateModel> {
     );
   }
 
-  Future<Result<void>> logPeriodStart(DateTime periodStart, {int cycleLength = 28}) async {
+  Future<Result<void>> logPeriodStart(
+    DateTime periodStart, {
+    int cycleLength = 28,
+    int? flowDuration,
+  }) async {
     state = state.copyWith(isLoading: true);
     final now = DateTime.now();
+    final periodEnd = flowDuration != null
+        ? periodStart.add(Duration(days: flowDuration))
+        : null;
     final record = CycleRecord(
       id: 'cycle_${now.millisecondsSinceEpoch}',
       periodStart: periodStart,
+      periodEnd: periodEnd,
       cycleLength: cycleLength,
       createdAt: now,
       updatedAt: now,

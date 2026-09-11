@@ -73,13 +73,12 @@ class _QuickFoodLogSheetState extends ConsumerState<QuickFoodLogSheet> {
 
     setState(() => _isSearching = true);
     try {
-      final foodDaoAsync = ref.read(foodDaoProvider);
-      final foodDao = foodDaoAsync.valueOrNull;
-      if (foodDao != null) {
-        final results = await foodDao.searchFoods(clean, limit: 10);
+      final foodRepo = ref.read(foodRepositoryProvider).asData?.value;
+      if (foodRepo != null) {
+        final res = await foodRepo.searchFoods(clean, limit: 10);
         if (mounted) {
           setState(() {
-            _searchResults = results;
+            _searchResults = res.valueOrNull ?? [];
             _isSearching = false;
           });
         }

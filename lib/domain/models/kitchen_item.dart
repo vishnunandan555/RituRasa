@@ -5,6 +5,7 @@ class KitchenItem extends Equatable {
   final String id;
   final String foodId;
   final String? foodName;
+  final String? category;
   final double quantity;
   final String unit;
   final DateTime addedAt;
@@ -15,6 +16,7 @@ class KitchenItem extends Equatable {
     required this.id,
     required this.foodId,
     this.foodName,
+    this.category,
     required this.quantity,
     required this.unit,
     required this.addedAt,
@@ -26,6 +28,7 @@ class KitchenItem extends Equatable {
     String? id,
     String? foodId,
     String? foodName,
+    String? category,
     double? quantity,
     String? unit,
     DateTime? addedAt,
@@ -36,6 +39,7 @@ class KitchenItem extends Equatable {
       id: id ?? this.id,
       foodId: foodId ?? this.foodId,
       foodName: foodName ?? this.foodName,
+      category: category ?? this.category,
       quantity: quantity ?? this.quantity,
       unit: unit ?? this.unit,
       addedAt: addedAt ?? this.addedAt,
@@ -45,5 +49,5 @@ class KitchenItem extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, foodId, foodName, quantity, unit, addedAt, updatedAt, expiresAt];
+  List<Object?> get props => [id, foodId, foodName, category, quantity, unit, addedAt, updatedAt, expiresAt];
 }

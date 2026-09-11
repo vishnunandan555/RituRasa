@@ -78,6 +78,7 @@ class _EditCycleSheetState extends ConsumerState<EditCycleSheet> {
     await ref.read(cycleNotifierProvider.notifier).logPeriodStart(
           _selectedPeriodStart,
           cycleLength: _cycleLength,
+          flowDuration: _flowDuration,
         );
 
     if (mounted) {
