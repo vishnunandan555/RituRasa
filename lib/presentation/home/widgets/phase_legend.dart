@@ -31,8 +31,8 @@ class PhaseLegend extends StatelessWidget {
             const SizedBox(width: 14),
             _LegendItem(
               color: theme.growthColor,
-              label: 'Growth',
-              isActive: activePhase?.toLowerCase() == 'growth',
+              label: 'Fertile',
+              isActive: activePhase?.toLowerCase() == 'fertile' || activePhase?.toLowerCase() == 'growth',
               theme: theme,
             ),
             const SizedBox(width: 14),

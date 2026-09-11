@@ -70,28 +70,39 @@ class CycleWheelPainter extends CustomPainter {
       // - Days 12 to 16: Peak (solid purple)
       // - Days 16 to 17: Smooth micro-blend to Luteal (neutral slate)
       // - Days 17 to 28: Luteal (neutral slate)
+      // Gradient stops mapped across the 28-day cycle matching the mockup:
+      // - Days 1 to 5: Period (solid crimson)
+      // - Days 5 to 6: Micro-blend to Fertile (blue)
+      // - Days 6 to 10: Fertile (solid blue)
+      // - Days 10 to 11: Micro-blend to Peak (purple)
+      // - Days 11 to 13: Peak (solid purple)
+      // - Days 13 to 14: Micro-blend to Ovulation (emerald mint)
+      // - Days 14 to 15: Micro-blend to Luteal (neutral slate)
+      // - Days 15 to 28: Luteal (neutral slate)
       final sweepGradient = SweepGradient(
         center: Alignment.center,
         startAngle: startAngle,
         endAngle: startAngle + (2 * pi),
         colors: [
-          theme.periodColor, // Day 1
-          theme.periodColor, // Day 5
-          theme.growthColor, // Day 6
-          theme.growthColor, // Day 11
-          theme.peakColor,   // Day 12
-          theme.peakColor,   // Day 16
-          theme.lutealColor, // Day 17
-          theme.lutealColor, // Day 28
+          theme.periodColor,             // Day 1
+          theme.periodColor,             // Day 5
+          theme.growthColor,             // Day 6
+          theme.growthColor,             // Day 10
+          theme.peakColor,               // Day 11
+          theme.peakColor,               // Day 13
+          theme.ovulationHighlightColor, // Day 14
+          theme.lutealColor,             // Day 15
+          theme.lutealColor,             // Day 28
         ],
         stops: const [
           0.0,            // Day 1
           4.0 / 28.0,     // Day 5
           5.0 / 28.0,     // Day 6
+          9.0 / 28.0,     // Day 10
           10.0 / 28.0,    // Day 11
-          11.0 / 28.0,    // Day 12
-          15.0 / 28.0,    // Day 16
-          16.0 / 28.0,    // Day 17
+          12.0 / 28.0,    // Day 13
+          13.0 / 28.0,    // Day 14
+          14.0 / 28.0,    // Day 15
           1.0,            // Day 28
         ],
       );
@@ -99,7 +110,7 @@ class CycleWheelPainter extends CustomPainter {
       final arcPaint = Paint()
         ..shader = sweepGradient.createShader(dialRect)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.2
+        ..strokeWidth = 3.5
         ..strokeCap = StrokeCap.round;
 
       canvas.drawArc(
@@ -276,13 +287,15 @@ class CycleWheelPainter extends CustomPainter {
 
   Color _getColorForDay(int day) {
     if (day <= 5) {
-      return theme.periodColor; // Period
-    } else if (day <= 11) {
-      return theme.growthColor; // Growth
-    } else if (day <= 16) {
-      return theme.peakColor; // Peak / Ovulation
+      return theme.periodColor; // Period (Days 1 - 5)
+    } else if (day <= 10) {
+      return theme.growthColor; // Fertile / Growth (Days 6 - 10)
+    } else if (day <= 13) {
+      return theme.peakColor; // Peak (Days 11 - 13)
+    } else if (day == 14) {
+      return theme.ovulationHighlightColor; // Ovulation (Day 14)
     } else {
-      return theme.lutealColor; // Luteal
+      return theme.lutealColor; // Luteal (Days 15 - 28)
     }
   }
 

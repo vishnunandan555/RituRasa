@@ -206,24 +206,21 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
                           );
                         },
                       ),
-                      const SizedBox(width: 4),
                       Text(
-                        '/ ${widget.totalCycleDays}',
+                        '/${widget.totalCycleDays}',
                         style: theme.cycleDayTotalStyle,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  // Phase Label with matching theme phase color
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 300),
+                  const SizedBox(height: 6),
+                  // Phase Label (Subtle spaced uppercase matching screenshot e.g. OVULATION)
+                  Text(
+                    _getPhaseNameForDay(_selectedDay).toUpperCase(),
                     style: theme.cyclePhaseLabelStyle.copyWith(
-                      color: _getPhaseColor(_selectedDay, theme),
-                      letterSpacing: 1.5,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    child: Text(
-                      _getPhaseNameForDay(_selectedDay).toUpperCase(),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2.0,
+                      color: theme.textSecondary.withValues(alpha: 0.75),
                     ),
                   ),
                 ],
@@ -240,15 +237,8 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
 
   String _getPhaseNameForDay(int day) {
     if (day <= 5) return 'Period';
-    if (day <= 11) return 'Growth';
-    if (day <= 16) return day == 14 ? 'Ovulation' : 'Peak';
+    if (day <= 10) return 'Fertile';
+    if (day <= 14) return 'Ovulation';
     return 'Luteal';
-  }
-
-  Color _getPhaseColor(int day, RituRasaThemeExtension theme) {
-    if (day <= 5) return theme.periodColor;
-    if (day <= 11) return theme.growthColor;
-    if (day <= 16) return day == 14 ? theme.ovulationHighlightColor : theme.peakColor;
-    return theme.textSecondary;
   }
 }

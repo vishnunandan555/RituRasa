@@ -6,6 +6,7 @@ import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
 import 'package:riturasa/presentation/home/widgets/cycle_metric_card.dart';
 import 'package:riturasa/presentation/home/widgets/cycle_wheel.dart';
+import 'package:riturasa/presentation/home/widgets/fertility_window_card.dart';
 import 'package:riturasa/presentation/home/widgets/hydration_card.dart';
 import 'package:riturasa/presentation/home/widgets/nutrition_overview_section.dart';
 import 'package:riturasa/presentation/home/widgets/phase_legend.dart';
@@ -170,6 +171,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: theme.periodColor,
                     ),
                     iconBgColor: theme.nextPeriodIconBg,
+                    iconBorder: Border.all(
+                      color: const Color(0xFFFFCCD5),
+                      width: 2.5,
+                    ),
                     title: 'Next Period',
                     pillText: 'in $daysToNextPeriod days',
                     pillBgColor: theme.pillNextPeriodBg,
@@ -187,9 +192,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   .fadeIn(duration: 700.ms, delay: 350.ms)
                   .slideY(begin: 0.15, end: 0),
 
+              const SizedBox(height: 14),
+
+              // 5. Fertility Window Card (e.g. Fertility Window / High Chance Today / 🔥 Peak)
+              FertilityWindowCard(
+                currentCycleDay: _activeDay,
+                onTap: () {
+                  setState(() {
+                    _activeDay = 12;
+                  });
+                },
+              )
+                  .animate()
+                  .fadeIn(duration: 700.ms, delay: 400.ms)
+                  .slideY(begin: 0.15, end: 0),
+
               const SizedBox(height: 28),
 
-              // 5. Nutrient Tracking Policy: Composite Dial & 3 Sub-Cards
+              // 6. Nutrient Tracking Policy: Composite Dial & 3 Sub-Cards
               NutritionOverviewSection(
                 categories: nutrientCategories,
               )
@@ -199,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // 6. Standalone Hydration (Water) Card
+              // 7. Standalone Hydration (Water) Card
               const HydrationCard()
                   .animate()
                   .fadeIn(duration: 700.ms, delay: 550.ms)
@@ -216,9 +236,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _getPhaseNameForDay(int day) {
     if (day <= 5) {
       return 'Period';
-    } else if (day <= 11) {
-      return 'Growth';
-    } else if (day <= 16) {
+    } else if (day <= 10) {
+      return 'Fertile';
+    } else if (day <= 14) {
       return day == 14 ? 'Ovulation' : 'Peak';
     } else {
       return 'Luteal';

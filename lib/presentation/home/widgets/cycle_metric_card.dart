@@ -10,12 +10,14 @@ class CycleMetricCard extends StatelessWidget {
   final Color pillBgColor;
   final Color pillTextColor;
   final String subtitle;
+  final BoxBorder? iconBorder;
   final VoidCallback? onTap;
 
   const CycleMetricCard({
     super.key,
     required this.icon,
     required this.iconBgColor,
+    this.iconBorder,
     required this.title,
     required this.pillText,
     required this.pillBgColor,
@@ -52,11 +54,12 @@ class CycleMetricCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: iconBgColor,
                       shape: BoxShape.circle,
+                      border: iconBorder ?? Border.all(color: theme.cardBorder, width: 1.0),
                     ),
                     alignment: Alignment.center,
                     child: icon,
