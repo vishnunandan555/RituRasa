@@ -128,6 +128,7 @@ class DatabaseManager {
         version: UserDatabaseSchema.currentVersion,
         onCreate: UserDatabaseSchema.onCreate,
         onUpgrade: UserDatabaseSchema.onUpgrade,
+        onOpen: UserDatabaseSchema.onOpen,
       );
 
       return Result.ok(_userDb!);

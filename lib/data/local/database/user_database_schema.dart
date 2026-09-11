@@ -25,7 +25,10 @@ class UserDatabaseSchema {
     batch.execute('''
       CREATE TABLE $tableProfile (
         id TEXT PRIMARY KEY,
+        name TEXT NOT NULL DEFAULT 'Ananya Sharma',
         age INTEGER NOT NULL,
+        prakriti TEXT NOT NULL DEFAULT 'Pitta-Vata',
+        agni TEXT NOT NULL DEFAULT 'Tikshna',
         diet_type TEXT NOT NULL,
         region TEXT NOT NULL,
         cuisine TEXT NOT NULL,
@@ -167,5 +170,18 @@ class UserDatabaseSchema {
   /// Versioned schema migrations
   static Future<void> onUpgrade(Database db, int oldVersion, int newVersion) async {
     // Migrations for future database version bumps
+  }
+
+  /// Ensure new columns exist even if user DB was created previously
+  static Future<void> onOpen(Database db) async {
+    try {
+      await db.execute("ALTER TABLE $tableProfile ADD COLUMN name TEXT DEFAULT 'Ananya Sharma'");
+    } catch (_) {}
+    try {
+      await db.execute("ALTER TABLE $tableProfile ADD COLUMN prakriti TEXT DEFAULT 'Pitta-Vata'");
+    } catch (_) {}
+    try {
+      await db.execute("ALTER TABLE $tableProfile ADD COLUMN agni TEXT DEFAULT 'Tikshna'");
+    } catch (_) {}
   }
 }

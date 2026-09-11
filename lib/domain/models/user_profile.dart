@@ -20,7 +20,10 @@ enum DietType {
 /// Authoritative local user profile entity.
 class UserProfile extends Equatable {
   final String id;
+  final String name;
   final int age;
+  final String prakriti;
+  final String agni;
   final DietType dietType;
   final String region;
   final String cuisine;
@@ -29,7 +32,10 @@ class UserProfile extends Equatable {
 
   const UserProfile({
     required this.id,
+    this.name = 'Ananya Sharma',
     required this.age,
+    this.prakriti = 'Pitta-Vata',
+    this.agni = 'Tikshna',
     required this.dietType,
     required this.region,
     required this.cuisine,
@@ -39,7 +45,10 @@ class UserProfile extends Equatable {
 
   UserProfile copyWith({
     String? id,
+    String? name,
     int? age,
+    String? prakriti,
+    String? agni,
     DietType? dietType,
     String? region,
     String? cuisine,
@@ -48,7 +57,10 @@ class UserProfile extends Equatable {
   }) {
     return UserProfile(
       id: id ?? this.id,
+      name: name ?? this.name,
       age: age ?? this.age,
+      prakriti: prakriti ?? this.prakriti,
+      agni: agni ?? this.agni,
       dietType: dietType ?? this.dietType,
       region: region ?? this.region,
       cuisine: cuisine ?? this.cuisine,
@@ -60,7 +72,10 @@ class UserProfile extends Equatable {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'name': name,
       'age': age,
+      'prakriti': prakriti,
+      'agni': agni,
       'diet_type': dietType.name,
       'region': region,
       'cuisine': cuisine,
@@ -72,7 +87,10 @@ class UserProfile extends Equatable {
   factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
       id: map['id'] as String,
+      name: map['name'] as String? ?? 'Ananya Sharma',
       age: (map['age'] as num).toInt(),
+      prakriti: map['prakriti'] as String? ?? 'Pitta-Vata',
+      agni: map['agni'] as String? ?? 'Tikshna',
       dietType: DietType.fromString(map['diet_type'] as String? ?? 'vegetarian'),
       region: map['region'] as String? ?? '',
       cuisine: map['cuisine'] as String? ?? '',
@@ -82,7 +100,7 @@ class UserProfile extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, age, dietType, region, cuisine, createdAt, updatedAt];
+  List<Object?> get props => [id, name, age, prakriti, agni, dietType, region, cuisine, createdAt, updatedAt];
 }
 
 /// User food preferences, exclusions, and allergies.
@@ -100,6 +118,22 @@ class UserPreferences extends Equatable {
     this.allergies = const [],
     required this.updatedAt,
   });
+
+  UserPreferences copyWith({
+    String? userId,
+    List<String>? preferredFoodIds,
+    List<String>? excludedFoodIds,
+    List<String>? allergies,
+    DateTime? updatedAt,
+  }) {
+    return UserPreferences(
+      userId: userId ?? this.userId,
+      preferredFoodIds: preferredFoodIds ?? this.preferredFoodIds,
+      excludedFoodIds: excludedFoodIds ?? this.excludedFoodIds,
+      allergies: allergies ?? this.allergies,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 
   @override
   List<Object?> get props => [userId, preferredFoodIds, excludedFoodIds, allergies, updatedAt];

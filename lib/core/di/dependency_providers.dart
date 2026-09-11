@@ -34,6 +34,7 @@ import '../../domain/services/recommendation_engine.dart';
 import '../../domain/services/shopping_service.dart';
 import '../../domain/services/sync_service.dart';
 import '../database/database_manager.dart';
+import '../database/initial_data_seeder.dart';
 
 // --- Database Providers ---
 final databaseManagerProvider = Provider<DatabaseManager>((ref) {
@@ -53,9 +54,17 @@ final userDatabaseProvider = FutureProvider<Database>((ref) async {
   final dbManager = ref.watch(databaseManagerProvider);
   final res = await dbManager.getUserDatabase();
   return res.fold(
-    onOk: (db) => db,
+    onOk: (db) async {
+      await InitialDataSeeder(dbManager).seedIfEmpty();
+      return db;
+    },
     onErr: (f) => throw Exception(f.message),
   );
+});
+
+final initialDataSeederProvider = Provider<InitialDataSeeder>((ref) {
+  final dbManager = ref.watch(databaseManagerProvider);
+  return InitialDataSeeder(dbManager);
 });
 
 // --- DAO Providers ---

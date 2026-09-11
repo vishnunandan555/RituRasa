@@ -77,6 +77,17 @@ class ProfileNotifier extends Notifier<ProfileState> {
     }
     return res;
   }
+
+  Future<Result<void>> updatePreferences(UserPreferences preferences) async {
+    state = state.copyWith(isLoading: true);
+    final res = await _repository.savePreferences(preferences);
+    if (res.isOk) {
+      state = state.copyWith(preferences: preferences, isLoading: false);
+    } else {
+      state = state.copyWith(isLoading: false, errorMessage: res.failureOrNull?.message);
+    }
+    return res;
+  }
 }
 
 final profileNotifierProvider = NotifierProvider<ProfileNotifier, ProfileState>(ProfileNotifier.new);
