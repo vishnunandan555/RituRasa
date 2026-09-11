@@ -77,5 +77,72 @@ void main() {
     expect(find.text('Hydration Tracker'), findsOneWidget);
     expect(find.text('1 Glass'), findsOneWidget);
   });
+
+  testWidgets('Home Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(340, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: RituRasaApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Today'), findsOneWidget);
+    expect(find.text('Cycle Day'), findsOneWidget);
+  });
+
+  testWidgets('Nutrition Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(340, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: RituRasaApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(GButton).at(1));
+    await tester.pumpAndSettle();
+    expect(find.text('Daily Nutrition'), findsOneWidget);
+  });
+
+  testWidgets('Shopping Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(340, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: RituRasaApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(GButton).at(3));
+    await tester.pumpAndSettle();
+    expect(find.text('Smart Grocery List'), findsOneWidget);
+  });
+
+  testWidgets('Profile Screen renders without overflow on compact 340px screen', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(340, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: RituRasaApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(GButton).at(4));
+    await tester.pumpAndSettle();
+    expect(find.text('My Profile'), findsOneWidget);
+  });
 }
 

@@ -80,27 +80,31 @@ class _NutritionOverviewSectionState extends State<NutritionOverviewSection> {
         ),
         const SizedBox(height: 12),
 
-        // Main Composite Layout: Circular Ring Left + 3 Sub-Cards Right
+        // Main Composite Layout: Circular Ring Left + 3 Sub-Cards Right (Dynamically Scaled)
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Left: Large Circular Progress Dial (Least Filled / Focused)
-            CategoryCircularDial(
-              category: focusedCategory,
-              onTap: () {
-                // If user tapped focused, reset override to return to auto least-filled
-                if (_overrideFocusedType != null) {
-                  setState(() {
-                    _overrideFocusedType = null;
-                  });
-                }
-              },
+            Expanded(
+              flex: 44,
+              child: CategoryCircularDial(
+                category: focusedCategory,
+                onTap: () {
+                  // If user tapped focused, reset override to return to auto least-filled
+                  if (_overrideFocusedType != null) {
+                    setState(() {
+                      _overrideFocusedType = null;
+                    });
+                  }
+                },
+              ),
             ),
 
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
 
             // Right: 3 Stacked Sub-Cards
             Expanded(
+              flex: 56,
               child: Column(
                 children: [
                   for (int i = 0; i < subCategories.length; i++) ...[

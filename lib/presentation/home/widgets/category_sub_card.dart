@@ -21,11 +21,13 @@ class CategorySubCard extends StatelessWidget {
     final theme = context.rituTheme;
     final (tintBg, accentColor, icon) = _getStyling(category.type, theme);
 
+    final isCompact = theme.isCompact;
+
     return PressableScale(
       onTap: onTap,
       child: Container(
-        height: 54,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        height: isCompact ? 50 : 54,
+        padding: EdgeInsets.symmetric(horizontal: isCompact ? 8 : 12, vertical: 6),
         decoration: BoxDecoration(
           color: tintBg,
           borderRadius: BorderRadius.circular(18),
@@ -35,8 +37,8 @@ class CategorySubCard extends StatelessWidget {
           children: [
             // Left Rounded Icon Badge
             Container(
-              width: 36,
-              height: 36,
+              width: isCompact ? 32 : 36,
+              height: isCompact ? 32 : 36,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.8),
                 shape: BoxShape.circle,
@@ -44,10 +46,10 @@ class CategorySubCard extends StatelessWidget {
               child: Icon(
                 icon,
                 color: accentColor,
-                size: 20,
+                size: isCompact ? 17 : 20,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: isCompact ? 6 : 10),
 
             // Middle: Title & Subtitle
             Expanded(
@@ -58,7 +60,7 @@ class CategorySubCard extends StatelessWidget {
                   Text(
                     category.title,
                     style: GoogleFonts.outfit(
-                      fontSize: 12,
+                      fontSize: isCompact ? 11 : 12,
                       fontWeight: FontWeight.w600,
                       color: accentColor.withValues(alpha: 0.9),
                     ),
@@ -68,7 +70,7 @@ class CategorySubCard extends StatelessWidget {
                   Text(
                     category.details,
                     style: GoogleFonts.outfit(
-                      fontSize: 10,
+                      fontSize: isCompact ? 9.5 : 10,
                       fontWeight: FontWeight.w500,
                       color: theme.textSecondary,
                     ),
@@ -79,11 +81,13 @@ class CategorySubCard extends StatelessWidget {
               ),
             ),
 
+            const SizedBox(width: 4),
+
             // Right: Big Progress Number
             Text(
               '${category.percentage.toInt()}%',
               style: GoogleFonts.outfit(
-                fontSize: 18,
+                fontSize: isCompact ? 15 : 18,
                 fontWeight: FontWeight.w800,
                 color: accentColor,
               ),

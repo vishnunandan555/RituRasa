@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
@@ -93,15 +94,96 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(
-            left: 20.0,
-            right: 20.0,
+          padding: EdgeInsets.only(
+            left: theme.screenPadding,
+            right: theme.screenPadding,
             top: 16.0,
             bottom: 110.0, // Avoid overlap with floating pill nav bar
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // 0. App Brand Bar
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/images/logo.png',
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.spa_rounded, size: 24),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'RituRasa',
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: theme.textPrimary,
+                                letterSpacing: -0.2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () {
+                        showAboutDialog(
+                          context: context,
+                          applicationName: 'RituRasa',
+                          applicationVersion: '1.0.0',
+                          applicationIcon: Image.asset('assets/images/logo.png', width: 44, height: 44),
+                          applicationLegalese: '© 2026 RituRasa\nAyurvedic Cycle & ICMR-NIN Nutrition Engine.',
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: theme.cardBackground,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: theme.cardBorder),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF10B981),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Offline Sync',
+                              style: GoogleFonts.outfit(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: theme.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ).animate().fadeIn(duration: 180.ms),
+
               // 1. Date Header
               Text(
                 'Today',
@@ -161,7 +243,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     },
                   ),
 
-                  const SizedBox(width: 14),
+                  SizedBox(width: theme.isCompact ? 8 : 14),
 
                   // Right Card: Next Period
                   CycleMetricCard(

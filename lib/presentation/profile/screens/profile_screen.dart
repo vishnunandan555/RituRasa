@@ -18,9 +18,9 @@ class ProfileScreen extends StatelessWidget {
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(
-            left: 20,
-            right: 20,
+          padding: EdgeInsets.only(
+            left: theme.screenPadding,
+            right: theme.screenPadding,
             top: 16,
             bottom: 110,
           ),
@@ -123,9 +123,9 @@ class ProfileScreen extends StatelessWidget {
               Row(
                 children: [
                   _buildStatTile(context, 'Avg Cycle', '28 Days', Icons.calendar_today_rounded),
-                  const SizedBox(width: 10),
+                  SizedBox(width: theme.isCompact ? 6 : 10),
                   _buildStatTile(context, 'Period Flow', '5 Days', Icons.water_drop_outlined),
-                  const SizedBox(width: 10),
+                  SizedBox(width: theme.isCompact ? 6 : 10),
                   _buildStatTile(context, 'Luteal Phase', '14 Days', Icons.timelapse_rounded),
                 ],
               ).animate().fadeIn(duration: 450.ms),
@@ -214,10 +214,128 @@ class ProfileScreen extends StatelessWidget {
                   ],
                 ),
               ).animate().fadeIn(duration: 550.ms),
+
+              const SizedBox(height: 22),
+
+              // About App Card with Logo
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: theme.cardBackground,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: theme.cardBorder, width: 1.2),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: theme.cardBorder),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'RituRasa',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Version 1.0.0 • Ayurvedic Cycle Syncing',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: theme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Harmonizing biological menstrual cycles with authentic Ayurvedic wisdom and ICMR-NIN nutritional science.',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w400,
+                        color: theme.textSecondary,
+                        height: 1.45,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showAppAboutDialog(context),
+                        icon: const Icon(Icons.info_outline_rounded, size: 16),
+                        label: Text(
+                          'About & Legal Info',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: theme.textPrimary,
+                          side: BorderSide(color: theme.cardBorder),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ).animate().fadeIn(duration: 600.ms),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showAppAboutDialog(BuildContext context) {
+    showAboutDialog(
+      context: context,
+      applicationName: 'RituRasa',
+      applicationVersion: '1.0.0',
+      applicationIcon: Container(
+        width: 48,
+        height: 48,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Image.asset('assets/images/logo.png'),
+      ),
+      applicationLegalese: '© 2026 RituRasa. All rights reserved.\nAyurvedic Cycle & ICMR-NIN Nutrition Engine.',
     );
   }
 
@@ -228,9 +346,13 @@ class ProfileScreen extends StatelessWidget {
     IconData icon,
   ) {
     final theme = context.rituTheme;
+    final isCompact = theme.isCompact;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 6 : 10,
+          vertical: isCompact ? 8 : 12,
+        ),
         decoration: BoxDecoration(
           color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
@@ -238,23 +360,29 @@ class ProfileScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 20, color: theme.textSecondary),
+            Icon(icon, size: isCompact ? 18 : 20, color: theme.textSecondary),
             const SizedBox(height: 6),
-            Text(
-              value,
-              style: GoogleFonts.outfit(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: theme.textPrimary,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: GoogleFonts.outfit(
+                  fontSize: isCompact ? 12 : 13,
+                  fontWeight: FontWeight.w800,
+                  color: theme.textPrimary,
+                ),
               ),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: theme.textMuted,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: isCompact ? 9.5 : 10,
+                  fontWeight: FontWeight.w500,
+                  color: theme.textMuted,
+                ),
               ),
             ),
           ],
@@ -277,7 +405,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Flexible(
+        Expanded(
           child: Text(
             value,
             textAlign: TextAlign.end,
@@ -286,6 +414,8 @@ class ProfileScreen extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: theme.textPrimary,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

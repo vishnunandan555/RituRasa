@@ -31,11 +31,16 @@ class CycleMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
 
+    final isCompact = theme.isCompact;
+
     return Expanded(
       child: PressableScale(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+          padding: EdgeInsets.symmetric(
+            horizontal: isCompact ? 12.0 : 16.0,
+            vertical: isCompact ? 14.0 : 18.0,
+          ),
           decoration: BoxDecoration(
             color: theme.cardBackground,
             borderRadius: BorderRadius.circular(24.0),
@@ -55,8 +60,8 @@ class CycleMetricCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: isCompact ? 34 : 40,
+                    height: isCompact ? 34 : 40,
                     decoration: BoxDecoration(
                       color: iconBgColor,
                       shape: BoxShape.circle,
@@ -65,7 +70,7 @@ class CycleMetricCard extends StatelessWidget {
                     alignment: Alignment.center,
                     child: icon,
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: isCompact ? 8 : 10),
                   Expanded(
                     child: Text(
                       title,
@@ -76,26 +81,35 @@ class CycleMetricCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: isCompact ? 10 : 14),
 
-              // Middle Row: Pill Badge
+              // Middle Row: Pill Badge (with FittedBox to prevent text wrapping)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? 9.0 : 12.0,
+                  vertical: isCompact ? 4.0 : 6.0,
+                ),
                 decoration: BoxDecoration(
                   color: pillBgColor,
                   borderRadius: BorderRadius.circular(16.0),
                 ),
-                child: Text(
-                  pillText,
-                  style: theme.cardPillTextStyle.copyWith(color: pillTextColor),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    pillText,
+                    style: theme.cardPillTextStyle.copyWith(color: pillTextColor),
+                    maxLines: 1,
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: isCompact ? 8 : 12),
 
               // Bottom Row: Subtitle
               Text(
                 subtitle,
                 style: theme.cardSubtitleStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

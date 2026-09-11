@@ -18,9 +18,9 @@ class NutritionScreen extends StatelessWidget {
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(
-            left: 20,
-            right: 20,
+          padding: EdgeInsets.only(
+            left: theme.screenPadding,
+            right: theme.screenPadding,
             top: 16,
             bottom: 110, // Avoid nav bar overlap
           ),
@@ -126,11 +126,11 @@ class NutritionScreen extends StatelessWidget {
               Row(
                 children: [
                   _buildMacroTile(context, 'Protein', '52g', '60g', 0.86, const Color(0xFF10B981)),
-                  const SizedBox(width: 6),
+                  SizedBox(width: theme.isCompact ? 4 : 6),
                   _buildMacroTile(context, 'Carbs', '180g', '240g', 0.75, const Color(0xFFF59E0B)),
-                  const SizedBox(width: 6),
+                  SizedBox(width: theme.isCompact ? 4 : 6),
                   _buildMacroTile(context, 'Fats', '38g', '50g', 0.76, const Color(0xFF8B5CF6)),
-                  const SizedBox(width: 6),
+                  SizedBox(width: theme.isCompact ? 4 : 6),
                   _buildMacroTile(context, 'Fiber', '26g', '30g', 0.87, const Color(0xFFFA2C56)),
                 ],
               ).animate().fadeIn(duration: 450.ms),
@@ -208,9 +208,13 @@ class NutritionScreen extends StatelessWidget {
     Color color,
   ) {
     final theme = context.rituTheme;
+    final isCompact = theme.isCompact;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 6 : 10,
+          vertical: isCompact ? 8 : 12,
+        ),
         decoration: BoxDecoration(
           color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
@@ -219,21 +223,29 @@ class NutritionScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: theme.textSecondary,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: isCompact ? 10 : 11,
+                  fontWeight: FontWeight.w600,
+                  color: theme.textSecondary,
+                ),
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              current,
-              style: GoogleFonts.outfit(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: theme.textPrimary,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                current,
+                style: GoogleFonts.outfit(
+                  fontSize: isCompact ? 13 : 15,
+                  fontWeight: FontWeight.w800,
+                  color: theme.textPrimary,
+                ),
               ),
             ),
             const SizedBox(height: 6),

@@ -26,35 +26,40 @@ class CategoryCircularDial extends StatelessWidget {
 
     return PressableScale(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.cardBackground,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: theme.cardBorder, width: 1.2),
-        ),
-        child: SizedBox(
-          width: 155,
-          height: 175,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // 1. Circular Progress Track with Smooth Animated Tween
-              TweenAnimationBuilder<double>(
-                tween: Tween<double>(begin: 0.0, end: targetProgress),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                builder: (context, animatedProgress, _) {
-                  return CustomPaint(
-                    size: const Size(140, 140),
-                    painter: _DialProgressPainter(
-                      progress: animatedProgress,
-                      activeColor: categoryColor,
-                      trackColor: theme.inactiveTrackColor.withValues(alpha: 0.4),
-                    ),
-                  );
-                },
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dialWidth = constraints.maxWidth;
+          final trackSize = (dialWidth - (theme.isCompact ? 14.0 : 22.0)).clamp(110.0, 145.0);
+
+          return Container(
+            padding: EdgeInsets.all(theme.isCompact ? 8.0 : 12.0),
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: theme.cardBorder, width: 1.2),
+            ),
+            child: SizedBox(
+              width: dialWidth,
+              height: theme.isCompact ? 162.0 : 175.0,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // 1. Circular Progress Track with Smooth Animated Tween
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0.0, end: targetProgress),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, animatedProgress, _) {
+                      return CustomPaint(
+                        size: Size(trackSize, trackSize),
+                        painter: _DialProgressPainter(
+                          progress: animatedProgress,
+                          activeColor: categoryColor,
+                          trackColor: theme.inactiveTrackColor.withValues(alpha: 0.4),
+                        ),
+                      );
+                    },
+                  ),
 
               // 2. Center Content with Smooth Cross-fade/Scale Transformation
               AnimatedSwitcher(
@@ -129,8 +134,10 @@ class CategoryCircularDial extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
+    },
+  ),
+);
   }
 
   Color _getCategoryColor(NutrientCategoryType type, RituRasaThemeExtension theme) {

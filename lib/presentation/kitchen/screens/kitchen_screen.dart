@@ -80,9 +80,9 @@ class _KitchenScreenState extends State<KitchenScreen> {
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(
-            left: 20,
-            right: 20,
+          padding: EdgeInsets.only(
+            left: theme.screenPadding,
+            right: theme.screenPadding,
             top: 16,
             bottom: 110, // Avoid overlap with floating nav bar
           ),
@@ -137,9 +137,9 @@ class _KitchenScreenState extends State<KitchenScreen> {
               Row(
                 children: [
                   _buildMetricPill(context, 'Total Items', '24', Icons.inventory_2_outlined),
-                  const SizedBox(width: 10),
+                  SizedBox(width: theme.isCompact ? 6 : 10),
                   _buildMetricPill(context, 'Expiring Soon', '2', Icons.timer_outlined, alert: true),
-                  const SizedBox(width: 10),
+                  SizedBox(width: theme.isCompact ? 6 : 10),
                   _buildMetricPill(context, 'Herbs', '8', Icons.spa_outlined),
                 ],
               ).animate().fadeIn(duration: 450.ms),
@@ -298,9 +298,13 @@ class _KitchenScreenState extends State<KitchenScreen> {
     bool alert = false,
   }) {
     final theme = context.rituTheme;
+    final isCompact = theme.isCompact;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 6 : 10,
+          vertical: isCompact ? 8 : 10,
+        ),
         decoration: BoxDecoration(
           color: theme.cardBackground,
           borderRadius: BorderRadius.circular(14),
@@ -310,30 +314,39 @@ class _KitchenScreenState extends State<KitchenScreen> {
           children: [
             Icon(
               icon,
-              size: 18,
+              size: isCompact ? 16 : 18,
               color: alert ? const Color(0xFFE11D48) : theme.textSecondary,
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: isCompact ? 4 : 6),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    count,
-                    style: GoogleFonts.outfit(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: theme.textPrimary,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      count,
+                      style: GoogleFonts.outfit(
+                        fontSize: isCompact ? 13 : 14,
+                        fontWeight: FontWeight.w800,
+                        color: theme.textPrimary,
+                      ),
                     ),
                   ),
-                  Text(
-                    label,
-                    style: GoogleFonts.outfit(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: theme.textMuted,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      label,
+                      style: GoogleFonts.outfit(
+                        fontSize: isCompact ? 9.5 : 10,
+                        fontWeight: FontWeight.w500,
+                        color: theme.textMuted,
+                      ),
+                      maxLines: 1,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

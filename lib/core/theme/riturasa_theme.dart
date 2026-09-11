@@ -76,7 +76,38 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   final TextStyle sectionHeaderStyle;
   final TextStyle dialPercentageStyle;
 
+  // Responsive Metrics (dynamically computed per device display)
+  final double screenWidth;
+  final double screenHeight;
+  final double scaleFactor;
+  final double fontScaleFactor;
+
+  /// Helper to scale any pixel dimension based on current device width
+  double scale(double value) => (value * scaleFactor).roundToDouble();
+
+  /// Helper to scale any font size based on current device width and clamped text scale
+  double scaleFont(double fontSize) => (fontSize * fontScaleFactor).roundToDouble();
+
+  /// True if device width is compact (< 370px, e.g. iPhone SE, smaller Androids)
+  bool get isCompact => screenWidth < 370.0;
+
+  /// True if device is tablet/foldable (>= 600px)
+  bool get isTablet => screenWidth >= 600.0;
+
+  /// Responsive screen padding (16 on compact, 20 on regular, 24 on wide)
+  double get screenPadding => isCompact ? 16.0 : (screenWidth > 500 ? 24.0 : 20.0);
+
+  /// Responsive card internal horizontal padding
+  double get cardHorizontalPadding => isCompact ? 12.0 : 16.0;
+
+  /// Responsive dial size for CycleWheel
+  double get dialSize => (screenWidth * 0.72).clamp(240.0, 310.0);
+
   const RituRasaThemeExtension({
+    this.screenWidth = 390.0,
+    this.screenHeight = 844.0,
+    this.scaleFactor = 1.0,
+    this.fontScaleFactor = 1.0,
     required this.periodColor,
     required this.growthColor,
     required this.peakColor,
@@ -272,7 +303,7 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   }
 
   @override
-  ThemeExtension<RituRasaThemeExtension> copyWith({
+  RituRasaThemeExtension copyWith({
     Color? periodColor,
     Color? growthColor,
     Color? peakColor,
@@ -312,6 +343,10 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     Color? vitaminsSubCardBg,
     Color? mineralsSubCardBg,
     Color? hydrationCardBg,
+    double? screenWidth,
+    double? screenHeight,
+    double? scaleFactor,
+    double? fontScaleFactor,
     TextStyle? dateHeaderStyle,
     TextStyle? dateTitleStyle,
     TextStyle? cycleDayLabelStyle,
@@ -328,6 +363,10 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     TextStyle? dialPercentageStyle,
   }) {
     return RituRasaThemeExtension(
+      screenWidth: screenWidth ?? this.screenWidth,
+      screenHeight: screenHeight ?? this.screenHeight,
+      scaleFactor: scaleFactor ?? this.scaleFactor,
+      fontScaleFactor: fontScaleFactor ?? this.fontScaleFactor,
       periodColor: periodColor ?? this.periodColor,
       growthColor: growthColor ?? this.growthColor,
       peakColor: peakColor ?? this.peakColor,
@@ -386,6 +425,46 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     );
   }
 
+  /// Dynamically computes and scales this ThemeExtension based on the active device display.
+  RituRasaThemeExtension withScaling(BuildContext context) {
+    final mq = MediaQuery.maybeOf(context);
+    if (mq == null) return this;
+
+    final width = mq.size.width;
+    final height = mq.size.height;
+    if (width <= 0) return this;
+
+    final sFactor = (width / 390.0).clamp(0.85, 1.25);
+    final sysTextScale = mq.textScaler.scale(1.0).clamp(0.88, 1.15);
+    final fScale = (sysTextScale * (width / 390.0).clamp(0.92, 1.08)).clamp(0.88, 1.20);
+
+    TextStyle scaleStyle(TextStyle style) {
+      final baseSize = style.fontSize ?? 14.0;
+      return style.copyWith(fontSize: (baseSize * fScale).roundToDouble());
+    }
+
+    return copyWith(
+      screenWidth: width,
+      screenHeight: height,
+      scaleFactor: sFactor,
+      fontScaleFactor: fScale,
+      dateHeaderStyle: scaleStyle(dateHeaderStyle),
+      dateTitleStyle: scaleStyle(dateTitleStyle),
+      cycleDayLabelStyle: scaleStyle(cycleDayLabelStyle),
+      cycleDayLargeStyle: scaleStyle(cycleDayLargeStyle),
+      cycleDayTotalStyle: scaleStyle(cycleDayTotalStyle),
+      cyclePhaseLabelStyle: scaleStyle(cyclePhaseLabelStyle),
+      legendTextStyle: scaleStyle(legendTextStyle),
+      cardTitleStyle: scaleStyle(cardTitleStyle),
+      cardPillTextStyle: scaleStyle(cardPillTextStyle),
+      cardSubtitleStyle: scaleStyle(cardSubtitleStyle),
+      screenTitleStyle: scaleStyle(screenTitleStyle),
+      screenSubtitleStyle: scaleStyle(screenSubtitleStyle),
+      sectionHeaderStyle: scaleStyle(sectionHeaderStyle),
+      dialPercentageStyle: scaleStyle(dialPercentageStyle),
+    );
+  }
+
   @override
   ThemeExtension<RituRasaThemeExtension> lerp(
     covariant ThemeExtension<RituRasaThemeExtension>? other,
@@ -393,6 +472,10 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   ) {
     if (other is! RituRasaThemeExtension) return this;
     return RituRasaThemeExtension(
+      screenWidth: screenWidth + (other.screenWidth - screenWidth) * t,
+      screenHeight: screenHeight + (other.screenHeight - screenHeight) * t,
+      scaleFactor: scaleFactor + (other.scaleFactor - scaleFactor) * t,
+      fontScaleFactor: fontScaleFactor + (other.fontScaleFactor - fontScaleFactor) * t,
       periodColor: Color.lerp(periodColor, other.periodColor, t)!,
       growthColor: Color.lerp(growthColor, other.growthColor, t)!,
       peakColor: Color.lerp(peakColor, other.peakColor, t)!,
@@ -480,9 +563,17 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
 }
 
 /// Convenience extension on BuildContext so all widgets can inherit
-/// theme styles with `context.rituTheme`.
+/// dynamically scaled theme styles and metrics with `context.rituTheme`.
 extension RituRasaThemeContext on BuildContext {
-  RituRasaThemeExtension get rituTheme =>
-      Theme.of(this).extension<RituRasaThemeExtension>() ??
-      RituRasaThemeExtension.light();
+  RituRasaThemeExtension get rituTheme {
+    final base = Theme.of(this).extension<RituRasaThemeExtension>() ??
+        RituRasaThemeExtension.light();
+    return base.withScaling(this);
+  }
+
+  double get screenWidth => MediaQuery.sizeOf(this).width;
+  double get screenHeight => MediaQuery.sizeOf(this).height;
+  double scale(double value) => rituTheme.scale(value);
+  double scaleFont(double fontSize) => rituTheme.scaleFont(fontSize);
+  bool get isCompact => rituTheme.isCompact;
 }

@@ -166,20 +166,30 @@ class _HydrationCardState extends State<HydrationCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '$_intakeMl / ${widget.targetMl} ml',
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: theme.textPrimary,
+              Flexible(
+                child: Text(
+                  '$_intakeMl / ${widget.targetMl} ml',
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Text(
-                '${(progress * 100).toInt()}% Reached',
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: theme.hydrationCategoryColor,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  '${(progress * 100).toInt()}% Reached',
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.hydrationCategoryColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
                 ),
               ),
             ],

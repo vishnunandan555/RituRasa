@@ -23,9 +23,18 @@ class FloatingPillNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
 
+    final isCompact = theme.isCompact;
+
     return Container(
-      margin: const EdgeInsets.only(left: 12, right: 12, bottom: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      margin: EdgeInsets.only(
+        left: isCompact ? 8 : 12,
+        right: isCompact ? 8 : 12,
+        bottom: isCompact ? 10 : 14,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: isCompact ? 4 : 6,
+        vertical: isCompact ? 5 : 6,
+      ),
       decoration: BoxDecoration(
         color: theme.navBarBackground,
         borderRadius: BorderRadius.circular(40),
@@ -44,16 +53,19 @@ class FloatingPillNavBar extends StatelessWidget {
         onTabChange: onTabSelected,
         haptic: true,
         tabBorderRadius: 28,
-        gap: 4,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        gap: isCompact ? 3 : 4,
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 7 : 10,
+          vertical: isCompact ? 7 : 8,
+        ),
         tabBackgroundColor: theme.navBarActivePill,
         activeColor: theme.navBarActiveContent,
         color: theme.navBarInactiveContent,
-        iconSize: 20,
+        iconSize: isCompact ? 18 : 20,
         curve: Curves.easeOutCubic,
         duration: const Duration(milliseconds: 240),
         textStyle: GoogleFonts.outfit(
-          fontSize: 12,
+          fontSize: isCompact ? 11 : 12,
           fontWeight: FontWeight.w700,
           color: theme.navBarActiveContent,
         ),

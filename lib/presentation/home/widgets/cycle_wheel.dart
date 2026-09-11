@@ -147,12 +147,12 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
-    const dialSize = 280.0;
+    final dialSize = theme.dialSize;
 
     return Center(
       child: GestureDetector(
-        onPanUpdate: (details) => _handlePanOrTap(details.localPosition, const Size(dialSize, dialSize)),
-        onTapDown: (details) => _handlePanOrTap(details.localPosition, const Size(dialSize, dialSize)),
+        onPanUpdate: (details) => _handlePanOrTap(details.localPosition, Size(dialSize, dialSize)),
+        onTapDown: (details) => _handlePanOrTap(details.localPosition, Size(dialSize, dialSize)),
         child: SizedBox(
           width: dialSize,
           height: dialSize,
@@ -168,7 +168,7 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
                 ]),
                 builder: (context, _) {
                   return CustomPaint(
-                    size: const Size(dialSize, dialSize),
+                    size: Size(dialSize, dialSize),
                     painter: CycleWheelPainter(
                       totalDays: widget.totalCycleDays,
                       currentCycleDay: _dayGlideAnimation.value,
@@ -182,6 +182,7 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
               ),
 
               // 2. Central Content (Cycle Day & Big Number)
+              // Phase label is now drawn on the ring near Day 14 by the painter
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -212,17 +213,6 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  // Phase Label (Subtle spaced uppercase matching screenshot e.g. OVULATION)
-                  Text(
-                    _getPhaseNameForDay(_selectedDay).toUpperCase(),
-                    style: theme.cyclePhaseLabelStyle.copyWith(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 2.0,
-                      color: theme.textSecondary.withValues(alpha: 0.75),
-                    ),
-                  ),
                 ],
               )
                   .animate()
@@ -233,12 +223,5 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
         ),
       ),
     );
-  }
-
-  String _getPhaseNameForDay(int day) {
-    if (day <= 5) return 'Period';
-    if (day <= 10) return 'Fertile';
-    if (day <= 14) return 'Ovulation';
-    return 'Luteal';
   }
 }

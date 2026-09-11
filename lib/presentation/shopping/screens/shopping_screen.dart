@@ -75,9 +75,9 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(
-            left: 20,
-            right: 20,
+          padding: EdgeInsets.only(
+            left: theme.screenPadding,
+            right: theme.screenPadding,
             top: 16,
             bottom: 110,
           ),
@@ -219,29 +219,27 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 3),
-                                Row(
-                                  children: [
-                                    Text(
-                                      item['qty'] as String,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.textSecondary,
-                                      ),
+                                Text.rich(
+                                  TextSpan(
+                                    text: item['qty'] as String,
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.textSecondary,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        '•  ${item['category']}',
+                                    children: [
+                                      TextSpan(
+                                        text: '  •  ${item['category']}',
                                         style: GoogleFonts.outfit(
-                                          fontSize: 12,
+                                          fontSize: 11.5,
                                           fontWeight: FontWeight.w500,
                                           color: theme.textMuted,
                                         ),
-                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
