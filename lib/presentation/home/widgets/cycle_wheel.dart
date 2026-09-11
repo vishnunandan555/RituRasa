@@ -217,7 +217,7 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
                   const SizedBox(height: 4),
                   // Active 4-Cycle Phase Pill Badge (Period, Growth, Peak, Luteal)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2.5),
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 3),
                     decoration: BoxDecoration(
                       color: _getPhaseColor(widget.currentPhaseName, theme).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
@@ -229,7 +229,7 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
                     child: Text(
                       widget.currentPhaseName,
                       style: GoogleFonts.outfit(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: _getPhaseColor(widget.currentPhaseName, theme),
                         letterSpacing: 0.4,

@@ -57,9 +57,9 @@ class CycleWheelPainter extends CustomPainter {
       center,
       radius,
       Paint()
-        ..color = const Color(0xFFE5E7EB).withValues(alpha: 0.5)
+        ..color = const Color(0xFFE5E7EB).withValues(alpha: 0.6)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.8,
+        ..strokeWidth = 2.4,
     );
 
     // =========================================================================
@@ -71,7 +71,7 @@ class CycleWheelPainter extends CustomPainter {
       final y = center.dy + radius * sin(angle);
       canvas.drawCircle(
         Offset(x, y),
-        2.5,
+        2.8,
         Paint()
           ..color = const Color(0xFFE5E7EB)
           ..style = PaintingStyle.fill,
@@ -84,7 +84,7 @@ class CycleWheelPainter extends CustomPainter {
     final dialRect = Rect.fromCircle(center: center, radius: radius);
     final arcPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5
+      ..strokeWidth = 5.2
       ..strokeCap = StrokeCap.round;
 
     for (final phase in _phaseBoundaries) {
@@ -116,12 +116,12 @@ class CycleWheelPainter extends CustomPainter {
       final phaseColor = _getColorForDay(day);
 
       // Crisp white backing
-      canvas.drawCircle(Offset(x, y), 4.2, Paint()
+      canvas.drawCircle(Offset(x, y), 5.0, Paint()
         ..color = Colors.white
         ..style = PaintingStyle.fill);
 
       // Phase-colored bead
-      canvas.drawCircle(Offset(x, y), 3.2, Paint()
+      canvas.drawCircle(Offset(x, y), 3.8, Paint()
         ..color = phaseColor
         ..style = PaintingStyle.fill);
     }
@@ -134,17 +134,17 @@ class CycleWheelPainter extends CustomPainter {
       final x = center.dx + radius * cos(angle);
       final y = center.dy + radius * sin(angle);
 
-      canvas.drawCircle(Offset(x, y), 4.5, Paint()
+      canvas.drawCircle(Offset(x, y), 5.2, Paint()
         ..color = Colors.white
         ..style = PaintingStyle.fill);
-      canvas.drawCircle(Offset(x, y), 4.5, Paint()
+      canvas.drawCircle(Offset(x, y), 5.2, Paint()
         ..color = theme.periodColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0);
+        ..strokeWidth = 2.4);
     }
 
     // =========================================================================
-    // PASS 6: Day 14 — Hollow teal ovulation ring + "OVULATION" label
+    // PASS 6: Day 14 — Hollow teal ovulation ring
     // =========================================================================
     {
       final day14Angle = startAngle + (14 - 1) * sweepPerDay;
@@ -152,12 +152,12 @@ class CycleWheelPainter extends CustomPainter {
       final day14Y = center.dy + radius * sin(day14Angle);
 
       final ovPulse = 1.0 + (0.06 * pulseProgress);
-      final ovRadius = 6.0 * ovPulse;
+      final ovRadius = 6.8 * ovPulse;
 
       // Soft glow
       canvas.drawCircle(
         Offset(day14X, day14Y),
-        ovRadius + 2.5,
+        ovRadius + 3.0,
         Paint()
           ..color = theme.ovulationHighlightColor.withValues(alpha: 0.20 + 0.10 * pulseProgress)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0),
@@ -170,10 +170,7 @@ class CycleWheelPainter extends CustomPainter {
       canvas.drawCircle(Offset(day14X, day14Y), ovRadius, Paint()
         ..color = theme.ovulationHighlightColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.2);
-
-      // "OVULATION" label — placed inside the ring with adequate spacing
-      _drawOvulationLabel(canvas, center, radius, day14Angle, sweepPerDay);
+        ..strokeWidth = 2.6);
     }
 
     // =========================================================================
@@ -186,12 +183,12 @@ class CycleWheelPainter extends CustomPainter {
 
       final activeColor = _getColorForDay(activeDay);
       final badgeScale = 1.0 + (0.04 * pulseProgress);
-      final badgeRadius = 10.5 * badgeScale;
+      final badgeRadius = 11.5 * badgeScale;
 
       // Colored ambient glow
       canvas.drawCircle(
         Offset(activeX, activeY),
-        badgeRadius + 3.5,
+        badgeRadius + 4.0,
         Paint()
           ..color = activeColor.withValues(alpha: 0.28 + 0.10 * pulseProgress)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0),
@@ -211,7 +208,7 @@ class CycleWheelPainter extends CustomPainter {
         text: '$activeDay',
         style: TextStyle(
           color: Colors.white,
-          fontSize: activeDay > 9 ? 9.5 : 10.5,
+          fontSize: activeDay > 9 ? 10.5 : 11.5,
           fontWeight: FontWeight.w800,
           fontFamily: theme.cycleDayLabelStyle.fontFamily,
         ),
@@ -230,37 +227,6 @@ class CycleWheelPainter extends CustomPainter {
     _drawDayLabel(canvas, center, labelRadius, 14, startAngle + (13 * sweepPerDay));
     _drawDayLabel(canvas, center, labelRadius, 21, startAngle + (20 * sweepPerDay));
     _drawDayLabel(canvas, center, labelRadius, 28, startAngle + (27 * sweepPerDay));
-  }
-
-  /// Draws "OVULATION" label cleanly along the inside arc to the upper-left of Day 14.
-  void _drawOvulationLabel(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    double day14Angle,
-    double sweepPerDay,
-  ) {
-    final ts = TextSpan(
-      text: 'OVULATION',
-      style: TextStyle(
-        color: const Color(0xFF9CA3AF),
-        fontSize: 8.5,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 1.0,
-        fontFamily: theme.cycleDayLabelStyle.fontFamily,
-      ),
-    );
-    final tp = TextPainter(text: ts, textAlign: TextAlign.center, textDirection: TextDirection.ltr)
-      ..layout();
-
-    // Position: inside the ring, placed along the arc around Day 12.5 so it sits
-    // gracefully before Day 14 with 18px inward clearance (never touching the arc or beads).
-    final labelAngle = day14Angle - (1.6 * sweepPerDay);
-    final labelDistance = radius - 18.0;
-    final labelX = center.dx + labelDistance * cos(labelAngle);
-    final labelY = center.dy + labelDistance * sin(labelAngle);
-
-    tp.paint(canvas, Offset(labelX - tp.width / 2, labelY - tp.height / 2));
   }
 
   void _drawDayLabel(

@@ -238,21 +238,22 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
         letterSpacing: -0.4,
       ),
       cycleDayLabelStyle: GoogleFonts.outfit(
-        fontSize: 12.5,
+        fontSize: 13.5,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF6B7280),
-        letterSpacing: 0.3,
+        letterSpacing: 0.2,
       ),
       cycleDayLargeStyle: GoogleFonts.outfit(
-        fontSize: 38,
+        fontSize: 44,
         fontWeight: FontWeight.w800,
         color: const Color(0xFF111827),
         letterSpacing: -0.8,
       ),
       cycleDayTotalStyle: GoogleFonts.outfit(
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF9CA3AF),
+        letterSpacing: -0.2,
       ),
       cyclePhaseLabelStyle: GoogleFonts.outfit(
         fontSize: 12,
