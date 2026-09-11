@@ -71,7 +71,7 @@ class InitialDataSeeder {
 
     if (kitchenCount == 0) {
       final staples = [
-        {'id': 'k_1', 'food_id': 'F001', 'custom_name': 'Fresh Palak (Spinach)', 'quantity': 2.0, 'unit': 'bunches'},
+        {'id': 'k_1', 'food_id': 'F001', 'custom_name': 'Fresh Spinach (Palak)', 'quantity': 2.0, 'unit': 'bunches'},
         {'id': 'k_2', 'food_id': 'F002', 'custom_name': 'Yellow Moong Dal (Split)', 'quantity': 500.0, 'unit': 'g'},
         {'id': 'k_3', 'food_id': 'F003', 'custom_name': 'Ragi Flour (Finger Millet)', 'quantity': 1.0, 'unit': 'kg'},
         {'id': 'k_4', 'food_id': 'F004', 'custom_name': 'Desi Cow Ghee', 'quantity': 250.0, 'unit': 'ml'},
@@ -84,7 +84,7 @@ class InitialDataSeeder {
       for (final item in staples) {
         await db.insert(UserDatabaseSchema.tableKitchenInventory, {
           ...item,
-          'created_at': now.toIso8601String(),
+          'added_at': now.toIso8601String(),
           'updated_at': now.toIso8601String(),
         });
       }
@@ -97,9 +97,9 @@ class InitialDataSeeder {
 
     if (shoppingCount == 0) {
       final cartItems = [
-        {'id': 's_1', 'food_id': 'F020', 'item_name': 'Fresh Lemon Juice', 'quantity': 100.0, 'unit': 'ml', 'is_checked': 0},
-        {'id': 's_2', 'food_id': 'F021', 'item_name': 'Cold Pressed Mustard Oil', 'quantity': 500.0, 'unit': 'ml', 'is_checked': 0},
-        {'id': 's_3', 'food_id': 'F022', 'item_name': 'Organic Pumpkin Seeds', 'quantity': 200.0, 'unit': 'g', 'is_checked': 1},
+        {'id': 's_1', 'food_id': 'F020', 'name': 'Fresh Lemon Juice', 'quantity': 100.0, 'unit': 'ml', 'is_checked': 0},
+        {'id': 's_2', 'food_id': 'F021', 'name': 'Cold Pressed Mustard Oil', 'quantity': 500.0, 'unit': 'ml', 'is_checked': 0},
+        {'id': 's_3', 'food_id': 'F022', 'name': 'Organic Pumpkin Seeds', 'quantity': 200.0, 'unit': 'g', 'is_checked': 1},
       ];
 
       for (final item in cartItems) {

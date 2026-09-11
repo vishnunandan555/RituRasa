@@ -1,40 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
+import 'package:riturasa/domain/models/kitchen_item.dart';
+import 'package:riturasa/features/kitchen/kitchen_controller.dart';
 import 'package:riturasa/presentation/kitchen/widgets/add_food_dialog.dart';
-
-class KitchenFoodItem {
-  final String id;
-  final String name;
-  int amount;
-  final String unit;
-  final String category;
-  final String nutrientHighlight;
-  final IconData icon;
-
-  KitchenFoodItem({
-    required this.id,
-    required this.name,
-    required this.amount,
-    required this.unit,
-    required this.category,
-    required this.nutrientHighlight,
-    required this.icon,
-  });
-}
 
 /// Kitchen & Pantry Screen
 /// Central inventory differentiator. Tracks available food items at home,
 /// calculates smart kitchen nutrient summaries, and feeds the recommendation engine.
-class KitchenScreen extends StatefulWidget {
+class KitchenScreen extends ConsumerStatefulWidget {
   const KitchenScreen({super.key});
 
   @override
-  State<KitchenScreen> createState() => _KitchenScreenState();
+  ConsumerState<KitchenScreen> createState() => _KitchenScreenState();
 }
 
-class _KitchenScreenState extends State<KitchenScreen> {
+class _KitchenScreenState extends ConsumerState<KitchenScreen> {
   int _selectedCategoryIndex = 0;
   final List<String> _categories = [
     'All',
@@ -44,113 +27,44 @@ class _KitchenScreenState extends State<KitchenScreen> {
     'Dairy & Healthy Fats',
   ];
 
-  final List<KitchenFoodItem> _items = [
-    KitchenFoodItem(
-      id: '1',
-      name: 'Fresh Spinach (Palak)',
-      amount: 2,
-      unit: 'bunches',
-      category: 'Vegetables',
-      nutrientHighlight: 'Iron · Folate · Vitamin C',
-      icon: Icons.eco_rounded,
-    ),
-    KitchenFoodItem(
-      id: '2',
-      name: 'Yellow Moong Dal',
-      amount: 500,
-      unit: 'g',
-      category: 'Protein & Staples',
-      nutrientHighlight: 'Bioavailable Protein · Fiber',
-      icon: Icons.grain_rounded,
-    ),
-    KitchenFoodItem(
-      id: '3',
-      name: 'Finger Millet (Ragi Flour)',
-      amount: 1000,
-      unit: 'g',
-      category: 'Protein & Staples',
-      nutrientHighlight: 'Calcium · Bioavailable Iron',
-      icon: Icons.breakfast_dining_rounded,
-    ),
-    KitchenFoodItem(
-      id: '4',
-      name: 'Sesame Seeds (Til)',
-      amount: 200,
-      unit: 'g',
-      category: 'Seeds & Superfoods',
-      nutrientHighlight: 'Zinc · Healthy Lipids',
-      icon: Icons.scatter_plot_rounded,
-    ),
-    KitchenFoodItem(
-      id: '5',
-      name: 'A2 Desi Cow Ghee',
-      amount: 450,
-      unit: 'ml',
-      category: 'Dairy & Healthy Fats',
-      nutrientHighlight: 'Ojas Builder · Fat Soluble Vit',
-      icon: Icons.water_drop_rounded,
-    ),
-    KitchenFoodItem(
-      id: '6',
-      name: 'Organic Tomatoes',
-      amount: 5,
-      unit: 'pcs',
-      category: 'Vegetables',
-      nutrientHighlight: 'Lycopene · Vitamin C',
-      icon: Icons.restaurant_menu_rounded,
-    ),
-  ];
-
-  void _openAddFoodDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => AddFoodDialog(
-        onAdd: (name, qtyStr, category, nutrientTag) {
-          int parsedAmount = 1;
-          String unit = qtyStr;
-          final match = RegExp(r'^(\d+)\s*(.*)$').firstMatch(qtyStr.trim());
-          if (match != null) {
-            parsedAmount = int.tryParse(match.group(1) ?? '1') ?? 1;
-            unit = match.group(2)?.trim().isNotEmpty == true ? match.group(2)!.trim() : 'item';
-          }
-
-          setState(() {
-            _items.insert(
-              0,
-              KitchenFoodItem(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                name: name,
-                amount: parsedAmount,
-                unit: unit,
-                category: category,
-                nutrientHighlight: nutrientTag,
-                icon: Icons.check_circle_outline,
-              ),
-            );
-          });
-        },
-      ),
-    );
-  }
-
-  void _adjustQuantity(KitchenFoodItem item, int delta) {
-    setState(() {
-      item.amount += delta;
-      if (item.amount <= 0) {
-        _items.removeWhere((i) => i.id == item.id);
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
+    final kitchenState = ref.watch(kitchenNotifierProvider);
+    final items = kitchenState.items;
 
+    // Filter items based on selected category chip
     final filteredItems = _selectedCategoryIndex == 0
-        ? _items
-        : _items.where((i) => i.category == _categories[_selectedCategoryIndex]).toList();
+        ? items
+        : items.where((item) {
+            final name = (item.foodName ?? '').toLowerCase();
+            final cat = _categories[_selectedCategoryIndex].toLowerCase();
+            if (cat.contains('vegetable')) {
+              return name.contains('spinach') ||
+                  name.contains('palak') ||
+                  name.contains('tomato') ||
+                  name.contains('methi') ||
+                  name.contains('amla');
+            } else if (cat.contains('protein')) {
+              return name.contains('dal') ||
+                  name.contains('millet') ||
+                  name.contains('ragi') ||
+                  name.contains('chana') ||
+                  name.contains('besan');
+            } else if (cat.contains('seed')) {
+              return name.contains('sesame') ||
+                  name.contains('til') ||
+                  name.contains('seed') ||
+                  name.contains('jeera') ||
+                  name.contains('turmeric') ||
+                  name.contains('haldi');
+            } else {
+              return name.contains('ghee') ||
+                  name.contains('curd') ||
+                  name.contains('milk') ||
+                  name.contains('paneer');
+            }
+          }).toList();
 
     return Scaffold(
       backgroundColor: theme.screenBackground,
@@ -166,7 +80,7 @@ class _KitchenScreenState extends State<KitchenScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Row
+              // 1. Header Bar: Title + Subtitle + "+ Add Food" CTA
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -178,7 +92,7 @@ class _KitchenScreenState extends State<KitchenScreen> {
                           'My Kitchen',
                           style: theme.screenTitleStyle,
                         ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1, end: 0),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 4),
                         Text(
                           'What do you have at home?',
                           style: theme.screenSubtitleStyle,
@@ -187,8 +101,8 @@ class _KitchenScreenState extends State<KitchenScreen> {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: _openAddFoodDialog,
-                    icon: const Icon(Icons.add, size: 16),
+                    onPressed: () => AddFoodDialog.show(context),
+                    icon: const Icon(Icons.add_rounded, size: 18),
                     label: Text(
                       'Add Food',
                       style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 13),
@@ -197,63 +111,89 @@ class _KitchenScreenState extends State<KitchenScreen> {
                       backgroundColor: theme.navBarActivePill,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                  ),
+                  ).animate().fadeIn(duration: 350.ms).scale(begin: const Offset(0.9, 0.9)),
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
-              // Smart Kitchen Summary Card
+              // 2. Smart Kitchen Summary Card
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.cardBackground,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: theme.cardBorder, width: 1.2),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF0F172A),
+                      const Color(0xFF1E293B),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0F172A).withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.auto_awesome,
-                            color: Color(0xFF10B981),
-                            size: 18,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.auto_awesome_rounded, color: Color(0xFFFBBF24), size: 18),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  'Smart Kitchen Summary',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           child: Text(
-                            'Smart Kitchen Summary',
+                            '${items.length} Ingredients',
                             style: GoogleFonts.outfit(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: theme.textPrimary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF34D399),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Your kitchen currently has 3 iron-rich foods · 2 protein sources · 2 high-calcium staples available for cycle-tailored cooking.',
+                      items.isEmpty
+                          ? 'Your pantry is currently empty. Add foods to unlock personalized recipe matching.'
+                          : 'Your pantry has strong coverage for iron and bioavailable proteins for your current cycle phase.',
                       style: GoogleFonts.outfit(
                         fontSize: 12.5,
-                        color: theme.textSecondary,
-                        height: 1.4,
+                        color: const Color(0xFFCBD5E1),
+                        height: 1.35,
                       ),
                     ),
                   ],
@@ -262,183 +202,208 @@ class _KitchenScreenState extends State<KitchenScreen> {
 
               const SizedBox(height: 18),
 
-              // Category Selector
-              SizedBox(
-                height: 36,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _categories.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final isSelected = index == _selectedCategoryIndex;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedCategoryIndex = index),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: isSelected ? theme.chipSelectedBg : theme.chipUnselectedBg,
-                          borderRadius: BorderRadius.circular(18),
+              // 3. Category Filter Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(_categories.length, (index) {
+                    final isSelected = _selectedCategoryIndex == index;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: FilterChip(
+                        selected: isSelected,
+                        label: Text(_categories[index]),
+                        labelStyle: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected ? Colors.white : theme.textPrimary,
                         ),
-                        child: Center(
-                          child: Text(
-                            _categories[index],
-                            style: GoogleFonts.outfit(
-                              fontSize: 12.5,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? theme.chipSelectedText : theme.chipUnselectedText,
-                            ),
+                        backgroundColor: theme.screenBackground,
+                        selectedColor: theme.navBarActivePill,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: isSelected ? theme.navBarActivePill : theme.cardBorder,
+                            width: 1,
                           ),
                         ),
+                        showCheckmark: false,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedCategoryIndex = index;
+                          });
+                        },
                       ),
                     );
-                  },
+                  }),
                 ),
-              ),
+              ).animate().fadeIn(duration: 450.ms),
 
               const SizedBox(height: 16),
 
-              // Inventory Items or Empty State
+              // 4. Food Items List or Empty State
               if (filteredItems.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Column(
-                      children: [
-                        Icon(Icons.kitchen_outlined, size: 48, color: theme.textMuted),
-                        const SizedBox(height: 12),
-                        Text(
-                          "Let's see what you can make.",
-                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: theme.textPrimary),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Add a few foods you have at home to unlock recipes.',
-                          style: GoogleFonts.outfit(fontSize: 13, color: theme.textSecondary),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _openAddFoodDialog,
-                          icon: const Icon(Icons.add, size: 16),
-                          label: Text(
-                            'Add Food',
-                            style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 13),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.navBarActivePill,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        ),
-                      ],
-                    ),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: theme.cardBackground,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: theme.cardBorder),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.kitchen_outlined, size: 48, color: theme.textSecondary.withValues(alpha: 0.5)),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No pantry foods in this category',
+                        style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: theme.textPrimary),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tap "+ Add Food" above to search and log items you have at home.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(fontSize: 12.5, color: theme.textSecondary),
+                      ),
+                    ],
                   ),
                 )
               else
                 ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: filteredItems.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  separatorBuilder: (context, index) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final item = filteredItems[index];
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: theme.cardBackground,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: theme.cardBorder, width: 1.1),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: theme.surfaceContainer,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: theme.cardBorder),
-                            ),
-                            child: Icon(item.icon, color: theme.textPrimary, size: 20),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.name,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.textPrimary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  item.nutrientHighlight,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w500,
-                                    color: theme.textSecondary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Stepper: - [Qty Unit] +
-                          Container(
-                            decoration: BoxDecoration(
-                              color: theme.surfaceContainer,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: theme.cardBorder),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                InkWell(
-                                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
-                                  onTap: () => _adjustQuantity(item, -1),
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                    child: Icon(Icons.remove, size: 14),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                                  child: Text(
-                                    '${item.amount} ${item.unit}',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                                InkWell(
-                                  borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
-                                  onTap: () => _adjustQuantity(item, 1),
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                    child: Icon(Icons.add, size: 14),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ).animate().fadeIn(delay: (40 * index).ms, duration: 250.ms);
+                    return _buildKitchenItemTile(context, item, theme);
                   },
-                ),
+                ).animate().fadeIn(duration: 500.ms),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildKitchenItemTile(BuildContext context, KitchenItem item, RituRasaThemeExtension theme) {
+    final name = item.foodName ?? 'Food Item';
+    final qtyDisplay = item.quantity % 1 == 0 ? item.quantity.toInt().toString() : item.quantity.toStringAsFixed(1);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: theme.cardBorder, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: theme.cardShadow,
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Food Icon
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: theme.navBarActivePill.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.eco_rounded, color: theme.navBarActivePill, size: 20),
+          ),
+          const SizedBox(width: 12),
+
+          // Name and Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    color: theme.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$qtyDisplay ${item.unit}',
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: theme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Quantity Steppers (- / +) and Delete
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  final newQty = item.quantity - 1;
+                  ref.read(kitchenNotifierProvider.notifier).updateQuantity(item.foodId, newQty);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(Icons.remove_circle_outline_rounded, size: 20, color: theme.textSecondary),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text(
+                  qtyDisplay,
+                  style: GoogleFonts.outfit(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: theme.textPrimary,
+                  ),
+                ),
+              ),
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  final newQty = item.quantity + 1;
+                  ref.read(kitchenNotifierProvider.notifier).updateQuantity(item.foodId, newQty);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(Icons.add_circle_outline_rounded, size: 20, color: theme.navBarActivePill),
+                ),
+              ),
+              const SizedBox(width: 4),
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  ref.read(kitchenNotifierProvider.notifier).removeItem(item.foodId);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Removed $name from pantry.'),
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(4.0),
+                  child: Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFE11D48)),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

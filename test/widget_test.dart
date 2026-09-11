@@ -4,8 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riturasa/main.dart';
 import 'package:riturasa/presentation/navigation/widgets/floating_pill_nav_bar.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:riturasa/core/database/database_manager.dart';
 
 void main() {
+  setUpAll(() {
+    DatabaseManager.ensureFfiInitialized();
+  });
+
   testWidgets('App renders Home Screen in center by default and switches between all 5 SRS screens', (WidgetTester tester) async {
     // Provide a standard phone screen size
     tester.view.physicalSize = const Size(412, 915);

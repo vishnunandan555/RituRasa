@@ -22,10 +22,16 @@ import 'data/remote/api_client_test.dart' as api_client_test;
 import 'integration/offline_flow_test.dart' as offline_flow_test;
 import 'integration/resilient_fallback_test.dart' as resilient_fallback_test;
 
+import 'package:riturasa/core/database/database_manager.dart';
+
 /// Master Test Aggregator
 /// Runs all 12 test suites (45+ tests) in a single Dart VM invocation,
 /// eliminating the multi-process VM restart overhead and running in 2-3 seconds.
 void main() {
+  setUpAll(() {
+    DatabaseManager.ensureFfiInitialized();
+  });
+
   group('RituRasa Unified Test Suite', () {
     group('[1/5] Widget & UI Tests', () {
       widget_test.main();

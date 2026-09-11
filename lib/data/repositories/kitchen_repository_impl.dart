@@ -21,6 +21,7 @@ class KitchenRepositoryImpl implements IKitchenRepository {
         return KitchenItem(
           id: r['id'] as String,
           foodId: r['food_id'] as String,
+          foodName: r['custom_name'] as String? ?? 'Food Item',
           quantity: (r['quantity'] as num).toDouble(),
           unit: r['unit'] as String? ?? 'units',
           addedAt: DateTime.tryParse(r['added_at']?.toString() ?? '') ?? DateTime.now(),
@@ -36,6 +37,7 @@ class KitchenRepositoryImpl implements IKitchenRepository {
     return await kitchenDao.addOrUpdateItem({
       'id': item.id,
       'food_id': item.foodId,
+      'custom_name': item.foodName,
       'quantity': item.quantity,
       'unit': item.unit,
       'added_at': item.addedAt.toIso8601String(),
@@ -47,11 +49,7 @@ class KitchenRepositoryImpl implements IKitchenRepository {
   @override
   Future<Result<void>> updateItemQuantity(String foodId, double quantity) async {
     final now = DateTime.now().toIso8601String();
-    return await kitchenDao.addOrUpdateItem({
-      'food_id': foodId,
-      'quantity': quantity,
-      'updated_at': now,
-    });
+    return await kitchenDao.updateQuantity(foodId, quantity, now);
   }
 
   @override

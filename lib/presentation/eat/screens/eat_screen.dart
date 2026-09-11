@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/core/widgets/pressable_scale.dart';
+import 'package:riturasa/domain/models/intake_entry.dart';
+import 'package:riturasa/features/intake/intake_controller.dart';
+import 'package:riturasa/features/shopping/shopping_controller.dart';
+import 'package:riturasa/presentation/eat/widgets/quick_food_log_sheet.dart';
 import 'package:riturasa/presentation/eat/widgets/recipe_detail_sheet.dart';
 
 /// Screen 2: Eat ("What should I eat?")
@@ -10,14 +15,14 @@ import 'package:riturasa/presentation/eat/widgets/recipe_detail_sheet.dart';
 /// - Current cycle phase & ICMR-NIN nutrition focus
 /// - Kitchen pantry inventory & missing ingredient status
 /// - Regional & Ayurvedic dietary compatibility
-class EatScreen extends StatefulWidget {
+class EatScreen extends ConsumerStatefulWidget {
   const EatScreen({super.key});
 
   @override
-  State<EatScreen> createState() => _EatScreenState();
+  ConsumerState<EatScreen> createState() => _EatScreenState();
 }
 
-class _EatScreenState extends State<EatScreen> {
+class _EatScreenState extends ConsumerState<EatScreen> {
   int _selectedFilterIndex = 0;
 
   final List<String> _filters = [
@@ -245,33 +250,79 @@ class _EatScreenState extends State<EatScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Header
-              Text(
-                'What should I eat?',
-                style: theme.screenTitleStyle,
-              ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1, end: 0),
-              const SizedBox(height: 4),
+              // 1. Header with Title and + Log Food Action
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: theme.peakColor,
-                      shape: BoxShape.circle,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'What should I eat?',
+                          style: theme.screenTitleStyle,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: theme.peakColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Peak Phase • Today\'s focus: Fiber + Zinc',
+                                style: theme.screenSubtitleStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      'Peak Phase • Today\'s focus: Fiber + Zinc',
-                      style: theme.screenSubtitleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 8),
+                  PressableScale(
+                    onTap: () => QuickFoodLogSheet.show(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: theme.navBarActivePill,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.navBarActivePill.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.add_rounded, color: Colors.white, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Log Food',
+                            style: GoogleFonts.outfit(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
-              ).animate().fadeIn(duration: 350.ms),
+              ).animate().fadeIn(duration: 300.ms),
 
               const SizedBox(height: 18),
 
@@ -358,10 +409,31 @@ class _EatScreenState extends State<EatScreen> {
                         context,
                         recipe: recipe,
                         onAteThis: () {
-                          // Feedback provided in sheet
+                          ref.read(intakeNotifierProvider.notifier).logMeal(
+                                recipeId: recipe['id'] as String?,
+                                name: recipe['name'] as String? ?? 'Recipe Meal',
+                                quantity: 1.0,
+                                unit: 'serving',
+                                mealType: MealType.fromString(recipe['mealType'] as String? ?? 'Lunch'),
+                                nutrients: {
+                                  'energy_kcal': (recipe['calories'] as num?)?.toDouble() ?? 320.0,
+                                  'protein_g': double.tryParse((recipe['protein'] as String? ?? '14.0').replaceAll(' g', '')) ?? 14.0,
+                                  'iron_mg': double.tryParse((recipe['iron'] as String? ?? '4.0').replaceAll(' mg', '')) ?? 4.0,
+                                  'fiber_g': double.tryParse((recipe['fiber'] as String? ?? '6.0').replaceAll(' g', '')) ?? 6.0,
+                                },
+                              );
                         },
                         onAddToCart: () {
-                          // Feedback provided in sheet
+                          final ingredients = (recipe['ingredients'] as List<Map<String, dynamic>>? ?? []);
+                          for (final item in ingredients.where((i) => i['inKitchen'] == false)) {
+                            ref.read(shoppingNotifierProvider.notifier).addItem(
+                                  foodId: 'food_${item['name']}',
+                                  name: item['name'] as String,
+                                  quantity: 1.0,
+                                  unit: item['qty'] as String? ?? 'units',
+                                  sourceRecipeIds: [recipe['id'] as String? ?? 'rec'],
+                                );
+                          }
                         },
                       );
                     },

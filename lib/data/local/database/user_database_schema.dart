@@ -69,6 +69,7 @@ class UserDatabaseSchema {
       CREATE TABLE $tableKitchenInventory (
         id TEXT PRIMARY KEY,
         food_id TEXT NOT NULL,
+        custom_name TEXT,
         quantity REAL NOT NULL DEFAULT 1.0,
         unit TEXT NOT NULL DEFAULT 'units',
         added_at TEXT NOT NULL,
@@ -182,6 +183,9 @@ class UserDatabaseSchema {
     } catch (_) {}
     try {
       await db.execute("ALTER TABLE $tableProfile ADD COLUMN agni TEXT DEFAULT 'Tikshna'");
+    } catch (_) {}
+    try {
+      await db.execute("ALTER TABLE $tableKitchenInventory ADD COLUMN custom_name TEXT");
     } catch (_) {}
   }
 }

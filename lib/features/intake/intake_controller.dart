@@ -39,7 +39,7 @@ class IntakeState {
 }
 
 class IntakeNotifier extends Notifier<IntakeState> {
-  late final IIntakeRepository _intakeRepository;
+  IIntakeRepository? _intakeRepository;
   late final NutritionProgressService _progressService;
 
   @override
@@ -54,8 +54,10 @@ class IntakeNotifier extends Notifier<IntakeState> {
   }
 
   Future<void> loadIntakesForDate(String date) async {
+    final repo = _intakeRepository;
+    if (repo == null) return;
     state = state.copyWith(date: date, isLoading: true, errorMessage: null);
-    final res = await _intakeRepository.getIntakesForDate(date);
+    final res = await repo.getIntakesForDate(date);
     res.fold(
       onOk: (entries) {
         final progress = _progressService.calculateDailyProgress(
@@ -97,18 +99,39 @@ class IntakeNotifier extends Notifier<IntakeState> {
       loggedAt: now,
     );
 
-    final res = await _intakeRepository.logIntake(entry);
+    final repo = _intakeRepository;
+    if (repo == null) {
+      final updated = [...state.entries, entry];
+      final progress = _progressService.calculateDailyProgress(
+        date: state.date,
+        intakes: updated,
+      );
+      state = state.copyWith(entries: updated, progressSummary: progress);
+      return Result.ok(null);
+    }
+
+    final res = await repo.logIntake(entry);
     if (res.isOk) {
       await loadIntakesForDate(state.date);
       if (state.progressSummary != null) {
-        await _intakeRepository.saveDailyNutrientTotals(state.progressSummary!.totals);
+        await repo.saveDailyNutrientTotals(state.progressSummary!.totals);
       }
     }
     return res;
   }
 
   Future<Result<void>> removeIntake(String id) async {
-    final res = await _intakeRepository.deleteIntake(id);
+    final repo = _intakeRepository;
+    if (repo == null) {
+      final updated = state.entries.where((e) => e.id != id).toList();
+      final progress = _progressService.calculateDailyProgress(
+        date: state.date,
+        intakes: updated,
+      );
+      state = state.copyWith(entries: updated, progressSummary: progress);
+      return Result.ok(null);
+    }
+    final res = await repo.deleteIntake(id);
     if (res.isOk) {
       await loadIntakesForDate(state.date);
     }

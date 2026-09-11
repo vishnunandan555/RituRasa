@@ -49,14 +49,26 @@ class DatabaseManager {
     }
 
     if (!kIsWeb && (Platform.isLinux || Platform.isWindows || Platform.isMacOS)) {
-      final docDir = await getApplicationSupportDirectory();
-      final dbDir = Directory(p.join(docDir.path, 'databases'));
-      if (!dbDir.existsSync()) {
-        dbDir.createSync(recursive: true);
+      try {
+        final docDir = await getApplicationSupportDirectory();
+        final dbDir = Directory(p.join(docDir.path, 'databases'));
+        if (!dbDir.existsSync()) {
+          dbDir.createSync(recursive: true);
+        }
+        return dbDir.path;
+      } catch (_) {
+        final tempDir = Directory(p.join(Directory.systemTemp.path, 'riturasa_dbs'));
+        if (!tempDir.existsSync()) {
+          tempDir.createSync(recursive: true);
+        }
+        return tempDir.path;
       }
-      return dbDir.path;
     } else {
-      return await getDatabasesPath();
+      try {
+        return await getDatabasesPath();
+      } catch (_) {
+        return Directory.systemTemp.path;
+      }
     }
   }
 

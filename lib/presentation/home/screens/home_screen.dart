@@ -146,11 +146,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final totalCycleDays = 28;
     final activePhaseName = _getPhaseNameForDay(_activeDay);
 
-    final daysToOvulation = _activeDay <= 14 ? 14 - _activeDay : (totalCycleDays - _activeDay) + 14;
-    final daysToNextPeriod = (totalCycleDays - _activeDay) + 1;
-    final nextPeriodDate = now.add(Duration(days: daysToNextPeriod));
-    final nextPeriodFormatted = DateFormat('MMMM d, yyyy').format(nextPeriodDate);
-
     final nutrientCategories = _buildNutrientCategories();
     final nutritionFocus = _getNutritionFocusForPhase(activePhaseName);
 

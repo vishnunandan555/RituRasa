@@ -42,6 +42,27 @@ class KitchenDao {
     }
   }
 
+  /// Update quantity of an existing food without overwriting other columns.
+  Future<Result<void>> updateQuantity(String foodId, double quantity, String updatedAt) async {
+    try {
+      await db.update(
+        UserDatabaseSchema.tableKitchenInventory,
+        {
+          'quantity': quantity,
+          'updated_at': updatedAt,
+        },
+        where: 'food_id = ?',
+        whereArgs: [foodId],
+      );
+      return const Result.ok(null);
+    } catch (e) {
+      return Result.err(DatabaseFailure(
+        message: 'Failed to update kitchen inventory quantity: $e',
+        cause: e,
+      ));
+    }
+  }
+
   /// Remove an item from the kitchen by food_id.
   Future<Result<void>> removeItem(String foodId) async {
     try {
