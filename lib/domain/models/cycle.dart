@@ -2,16 +2,19 @@ import 'package:equatable/equatable.dart';
 
 /// Supported menstrual cycle phase identifiers.
 enum CyclePhaseType {
-  menstrual,
-  follicular,
-  ovulatory,
-  luteal;
+  menstrual('Period'),
+  follicular('Growth'),
+  ovulatory('Peak'),
+  luteal('Luteal');
+
+  final String displayName;
+  const CyclePhaseType(this.displayName);
 
   static CyclePhaseType fromId(String id) {
     return switch (id.toLowerCase().trim()) {
-      'menstrual' => CyclePhaseType.menstrual,
-      'follicular' => CyclePhaseType.follicular,
-      'ovulatory' => CyclePhaseType.ovulatory,
+      'menstrual' || 'period' => CyclePhaseType.menstrual,
+      'follicular' || 'growth' => CyclePhaseType.follicular,
+      'ovulatory' || 'peak' || 'ovulation' => CyclePhaseType.ovulatory,
       'luteal' => CyclePhaseType.luteal,
       _ => CyclePhaseType.follicular,
     };
