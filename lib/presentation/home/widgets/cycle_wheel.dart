@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,7 +6,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/riturasa_theme.dart';
 import 'cycle_wheel_painter.dart';
 
-/// Interactive animated circular cycle tracker dial matching the screenshot.
+/// Interactive animated circular cycle tracker dial.
+/// Features:
+/// - Continuous sweep gradient arc (zero color overlap/bleeding)
+/// - Multi-pass crisp bead rendering
+/// - Breathing pulse animation on active day badge & Day 14 ovulation highlight
+/// - Fluid animated day transition on touch and drag with tactile haptics
 class CycleWheel extends StatefulWidget {
   final int currentCycleDay;
   final int totalCycleDays;
@@ -24,43 +30,98 @@ class CycleWheel extends StatefulWidget {
   State<CycleWheel> createState() => _CycleWheelState();
 }
 
-class _CycleWheelState extends State<CycleWheel> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _progressAnimation;
+class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
+  late AnimationController _entryController;
+  late Animation<double> _entryProgressAnimation;
+
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  late AnimationController _dayGlideController;
+  late Animation<double> _dayGlideAnimation;
+
   late int _selectedDay;
+  late double _currentAnimatedDay;
+  double _previousAnimatedDay = 1.0;
 
   @override
   void initState() {
     super.initState();
     _selectedDay = widget.currentCycleDay;
+    _currentAnimatedDay = widget.currentCycleDay.toDouble();
+    _previousAnimatedDay = _currentAnimatedDay;
 
-    _controller = AnimationController(
+    // 1. Initial Entry Reveal Animation
+    _entryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 1200),
     );
-
-    _progressAnimation = CurvedAnimation(
-      parent: _controller,
+    _entryProgressAnimation = CurvedAnimation(
+      parent: _entryController,
       curve: Curves.easeOutCubic,
     );
 
-    _controller.forward();
+    // 2. Continuous Breathing Pulse Animation for active badge & ovulation ring
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      _pulseController.repeat(reverse: true);
+    } else {
+      _pulseController.value = 1.0;
+    }
+    _pulseAnimation = CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOutSine,
+    );
+
+    // 3. Fluid Day Glide Animation (when user drags or taps new day)
+    _dayGlideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+    );
+    _dayGlideAnimation = Tween<double>(
+      begin: _previousAnimatedDay,
+      end: _currentAnimatedDay,
+    ).animate(CurvedAnimation(
+      parent: _dayGlideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _entryController.forward();
   }
 
   @override
   void didUpdateWidget(covariant CycleWheel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentCycleDay != widget.currentCycleDay) {
-      setState(() {
-        _selectedDay = widget.currentCycleDay;
-      });
-      _controller.forward(from: 0.0);
+      _glideToDay(widget.currentCycleDay);
     }
+  }
+
+  void _glideToDay(int newDay) {
+    _previousAnimatedDay = _dayGlideAnimation.value;
+    _selectedDay = newDay;
+    _currentAnimatedDay = newDay.toDouble();
+
+    _dayGlideAnimation = Tween<double>(
+      begin: _previousAnimatedDay,
+      end: _currentAnimatedDay,
+    ).animate(CurvedAnimation(
+      parent: _dayGlideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _dayGlideController.forward(from: 0.0);
+    setState(() {});
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _entryController.dispose();
+    _pulseController.dispose();
+    _dayGlideController.dispose();
     super.dispose();
   }
 
@@ -78,9 +139,7 @@ class _CycleWheelState extends State<CycleWheel> with SingleTickerProviderStateM
 
     if (tappedDay != _selectedDay && tappedDay >= 1 && tappedDay <= widget.totalCycleDays) {
       HapticFeedback.selectionClick();
-      setState(() {
-        _selectedDay = tappedDay;
-      });
+      _glideToDay(tappedDay);
       widget.onDaySelected?.call(tappedDay);
     }
   }
@@ -100,18 +159,23 @@ class _CycleWheelState extends State<CycleWheel> with SingleTickerProviderStateM
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // 1. Custom Wheel Painter
+              // 1. Custom Wheel Painter with Animated Builders
               AnimatedBuilder(
-                animation: _progressAnimation,
+                animation: Listenable.merge([
+                  _entryProgressAnimation,
+                  _pulseAnimation,
+                  _dayGlideAnimation,
+                ]),
                 builder: (context, _) {
                   return CustomPaint(
                     size: const Size(dialSize, dialSize),
                     painter: CycleWheelPainter(
                       totalDays: widget.totalCycleDays,
-                      currentCycleDay: widget.currentCycleDay.toDouble(),
+                      currentCycleDay: _dayGlideAnimation.value,
                       activeDay: _selectedDay,
                       theme: theme,
-                      animationProgress: _progressAnimation.value,
+                      animationProgress: _entryProgressAnimation.value,
+                      pulseProgress: _pulseAnimation.value,
                     ),
                   );
                 },
@@ -133,9 +197,9 @@ class _CycleWheelState extends State<CycleWheel> with SingleTickerProviderStateM
                     children: [
                       // Animated Number Counter
                       AnimatedBuilder(
-                        animation: _progressAnimation,
+                        animation: _entryProgressAnimation,
                         builder: (context, _) {
-                          final animatedDisplayDay = (_selectedDay * _progressAnimation.value).round();
+                          final animatedDisplayDay = (_selectedDay * _entryProgressAnimation.value).round();
                           return Text(
                             '$animatedDisplayDay',
                             style: theme.cycleDayLargeStyle,
@@ -150,18 +214,23 @@ class _CycleWheelState extends State<CycleWheel> with SingleTickerProviderStateM
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Phase Badge text
-                  Text(
-                    widget.currentPhaseName.toUpperCase(),
+                  // Phase Label with matching theme phase color
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 300),
                     style: theme.cyclePhaseLabelStyle.copyWith(
-                      color: _getPhaseColor(widget.currentPhaseName, theme),
+                      color: _getPhaseColor(_selectedDay, theme),
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    child: Text(
+                      _getPhaseNameForDay(_selectedDay).toUpperCase(),
                     ),
                   ),
                 ],
               )
                   .animate()
                   .fadeIn(duration: 800.ms, curve: Curves.easeOut)
-                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1.0, 1.0)),
+                  .scale(begin: const Offset(0.92, 0.92), end: const Offset(1.0, 1.0)),
             ],
           ),
         ),
@@ -169,13 +238,17 @@ class _CycleWheelState extends State<CycleWheel> with SingleTickerProviderStateM
     );
   }
 
-  Color _getPhaseColor(String phaseName, RituRasaThemeExtension theme) {
-    return switch (phaseName.toLowerCase()) {
-      'period' => theme.periodColor,
-      'growth' => theme.growthColor,
-      'peak' || 'ovulation' => theme.peakColor,
-      'luteal' => theme.textSecondary,
-      _ => theme.textSecondary,
-    };
+  String _getPhaseNameForDay(int day) {
+    if (day <= 5) return 'Period';
+    if (day <= 11) return 'Growth';
+    if (day <= 16) return day == 14 ? 'Ovulation' : 'Peak';
+    return 'Luteal';
+  }
+
+  Color _getPhaseColor(int day, RituRasaThemeExtension theme) {
+    if (day <= 5) return theme.periodColor;
+    if (day <= 11) return theme.growthColor;
+    if (day <= 16) return day == 14 ? theme.ovulationHighlightColor : theme.peakColor;
+    return theme.textSecondary;
   }
 }
