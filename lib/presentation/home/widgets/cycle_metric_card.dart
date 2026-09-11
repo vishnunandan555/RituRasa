@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/theme/riturasa_theme.dart';
 
 /// Card component for Ovulation and Next Period metric highlights.
 class CycleMetricCard extends StatelessWidget {

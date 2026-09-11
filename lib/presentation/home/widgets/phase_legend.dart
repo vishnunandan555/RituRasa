@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/theme/riturasa_theme.dart';
 
 /// Renders the 4-phase legend row:
 /// Period | Growth | Peak | Luteal

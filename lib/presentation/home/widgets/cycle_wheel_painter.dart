@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../../core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/theme/riturasa_theme.dart';
 
 /// CustomPainter drawing the 28-day circular cycle tracker.
 /// Uses a continuous sweep gradient arc and multi-pass bead rendering

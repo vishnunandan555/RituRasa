@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../core/theme/riturasa_theme.dart';
-import '../../../features/cycle/cycle_controller.dart';
-import '../widgets/cycle_metric_card.dart';
-import '../widgets/cycle_wheel.dart';
-import '../widgets/phase_legend.dart';
+import 'package:riturasa/core/theme/riturasa_theme.dart';
+import 'package:riturasa/features/cycle/cycle_controller.dart';
+import 'package:riturasa/presentation/home/widgets/cycle_metric_card.dart';
+import 'package:riturasa/presentation/home/widgets/cycle_wheel.dart';
+import 'package:riturasa/presentation/home/widgets/phase_legend.dart';
 
 /// RituRasa Home Screen featuring the 28-day circular cycle tracker dial
 /// and key physiological phase metrics.

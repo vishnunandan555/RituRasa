@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'cycle_wheel_painter.dart';
 
 /// Interactive animated circular cycle tracker dial.
