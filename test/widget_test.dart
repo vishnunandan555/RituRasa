@@ -28,8 +28,7 @@ void main() {
     expect(find.text('Growth'), findsOneWidget);
     expect(find.text('Peak'), findsWidgets);
     expect(find.text('Luteal'), findsOneWidget);
-    expect(find.text('Ovulation'), findsOneWidget);
-    expect(find.text('Next Period'), findsOneWidget);
+    expect(find.text('Next Cycle Window'), findsOneWidget);
     expect(find.text('What should you eat next?'), findsOneWidget);
     expect(find.text('Spinach Moong Dal'), findsOneWidget);
 

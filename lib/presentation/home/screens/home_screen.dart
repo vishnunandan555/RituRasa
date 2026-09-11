@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
 import 'package:riturasa/presentation/eat/widgets/recipe_detail_sheet.dart';
-import 'package:riturasa/presentation/home/widgets/cycle_metric_card.dart';
 import 'package:riturasa/presentation/home/widgets/cycle_wheel.dart';
+import 'package:riturasa/presentation/home/widgets/cycle_window_card.dart';
 import 'package:riturasa/presentation/home/widgets/hydration_card.dart';
 import 'package:riturasa/presentation/home/widgets/nutrition_overview_section.dart';
 import 'package:riturasa/presentation/home/widgets/phase_legend.dart';
@@ -262,7 +262,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 style: theme.dateTitleStyle,
               ).animate().fadeIn(duration: 220.ms, delay: 30.ms).slideY(begin: -0.06, end: 0, curve: Curves.easeOutCubic),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 24),
 
               // 2. Animated Circular Dial Tracker
               CycleWheel(
@@ -276,64 +276,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 },
               ).animate().fadeIn(duration: 260.ms, delay: 40.ms).scale(begin: const Offset(0.97, 0.97), curve: Curves.easeOutCubic),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 24),
 
               // 3. 4-Phase Legend Row
               PhaseLegend(
                 activePhase: activePhaseName,
               ).animate().fadeIn(duration: 220.ms, delay: 60.ms),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 22),
 
-              // 4. Metric Cards Row: Ovulation & Next Period
-              Row(
-                children: [
-                  // Left Card: Ovulation
-                  CycleMetricCard(
-                    icon: Icon(
-                      Icons.egg_outlined,
-                      size: 20,
-                      color: theme.textSecondary,
-                    ),
-                    iconBgColor: theme.ovulationIconBg,
-                    title: 'Ovulation',
-                    pillText: 'in $daysToOvulation days',
-                    pillBgColor: theme.pillOvulationBg,
-                    pillTextColor: theme.pillOvulationText,
-                    subtitle: 'Day 14',
-                    onTap: () {
-                      setState(() {
-                        _activeDay = 14;
-                      });
-                    },
-                  ),
-
-                  SizedBox(width: theme.isCompact ? 8 : 14),
-
-                  // Right Card: Next Period
-                  CycleMetricCard(
-                    icon: Icon(
-                      Icons.water_drop_rounded,
-                      size: 20,
-                      color: theme.periodColor,
-                    ),
-                    iconBgColor: theme.nextPeriodIconBg,
-                    iconBorder: Border.all(
-                      color: const Color(0xFFFFCCD5),
-                      width: 2.5,
-                    ),
-                    title: 'Next Period',
-                    pillText: 'in $daysToNextPeriod days',
-                    pillBgColor: theme.pillNextPeriodBg,
-                    pillTextColor: theme.pillNextPeriodText,
-                    subtitle: nextPeriodFormatted,
-                    onTap: () {
-                      setState(() {
-                        _activeDay = 1;
-                      });
-                    },
-                  ),
-                ],
+              // 4. Single Horizontal Anticipated Cycle Window Card
+              CycleWindowCard(
+                currentDay: _activeDay,
+                totalDays: totalCycleDays,
+                onTap: () {
+                  setState(() {
+                    _activeDay = 1;
+                  });
+                },
               )
                   .animate()
                   .fadeIn(duration: 240.ms, delay: 80.ms)
