@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/dependency_providers.dart';
-import '../../core/errors/failure.dart';
 import '../../core/utils/result.dart';
 import '../../domain/models/shopping_item.dart';
 import '../../domain/repositories/i_shopping_repository.dart';
@@ -32,57 +31,33 @@ class ShoppingState {
 class ShoppingNotifier extends Notifier<ShoppingState> {
   IShoppingRepository? _shoppingRepository;
 
-  static final List<ShoppingListItem> defaultCartItems = [
-    ShoppingListItem(
-      id: 's_1',
-      foodId: 'F020',
-      name: 'Fresh Lemon Juice',
-      quantity: 100.0,
-      unit: 'ml',
-      isChecked: false,
-      createdAt: DateTime(2026, 9, 1),
-      updatedAt: DateTime(2026, 9, 1),
-    ),
-    ShoppingListItem(
-      id: 's_2',
-      foodId: 'F021',
-      name: 'Cold Pressed Mustard Oil',
-      quantity: 500.0,
-      unit: 'ml',
-      isChecked: false,
-      createdAt: DateTime(2026, 9, 1),
-      updatedAt: DateTime(2026, 9, 1),
-    ),
-    ShoppingListItem(
-      id: 's_3',
-      foodId: 'F022',
-      name: 'Organic Pumpkin Seeds',
-      quantity: 200.0,
-      unit: 'g',
-      isChecked: true,
-      createdAt: DateTime(2026, 9, 1),
-      updatedAt: DateTime(2026, 9, 1),
-    ),
-  ];
-
   @override
   ShoppingState build() {
-    ref.watch(shoppingRepositoryProvider).whenData((repo) {
-      _shoppingRepository = repo;
-      loadShoppingList();
+    ref.listen(shoppingRepositoryProvider, (previous, next) {
+      next.whenData((repo) {
+        _shoppingRepository = repo;
+        loadShoppingList();
+      });
     });
-    return ShoppingState(items: defaultCartItems);
+
+    final currentRepo = ref.watch(shoppingRepositoryProvider).value;
+    if (currentRepo != null) {
+      _shoppingRepository = currentRepo;
+      Future.microtask(() => loadShoppingList());
+    }
+
+    return const ShoppingState();
   }
 
   Future<void> loadShoppingList() async {
-    final repo = _shoppingRepository;
-    if (repo == null) return;
+    final IShoppingRepository repo = _shoppingRepository ?? await ref.read(shoppingRepositoryProvider.future);
+    _shoppingRepository = repo;
     state = state.copyWith(isLoading: true, errorMessage: null);
     final res = await repo.getShoppingList();
     res.fold(
       onOk: (items) {
         state = state.copyWith(
-          items: items.isNotEmpty ? items : defaultCartItems,
+          items: items,
           isLoading: false,
         );
       },

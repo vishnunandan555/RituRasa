@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:riturasa/core/di/dependency_providers.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/core/widgets/pressable_scale.dart';
 import 'package:riturasa/domain/models/intake_entry.dart';
+import 'package:riturasa/domain/models/recipe.dart';
+import 'package:riturasa/domain/models/recommendation.dart';
+import 'package:riturasa/features/cycle/cycle_controller.dart';
 import 'package:riturasa/features/intake/intake_controller.dart';
+import 'package:riturasa/features/kitchen/kitchen_controller.dart';
+import 'package:riturasa/features/nutrition/recommendation_controller.dart';
 import 'package:riturasa/features/shopping/shopping_controller.dart';
 import 'package:riturasa/presentation/eat/widgets/quick_food_log_sheet.dart';
 import 'package:riturasa/presentation/eat/widgets/recipe_detail_sheet.dart';
@@ -205,36 +211,124 @@ class _EatScreenState extends ConsumerState<EatScreen> {
     },
   ];
 
-  List<Map<String, dynamic>> get _filteredRecipes {
+  Map<String, dynamic> _mapRankedRecipeToUi(RankedRecipeItem ranked, BuildContext context) {
+    final theme = context.rituTheme;
+    final r = ranked.recipe;
+    final total = r.ingredients.length;
+    final avail = ranked.matchedCount;
+    final isFull = avail >= total && total > 0;
+
+    final cal = r.nutritionPerServing['energy_kcal']?.round() ?? 320;
+    final pro = '${(r.nutritionPerServing['protein_g'] ?? 12.0).toStringAsFixed(1)} g';
+    final iron = '${(r.nutritionPerServing['iron_mg'] ?? 3.5).toStringAsFixed(1)} mg';
+    final fiber = '${(r.nutritionPerServing['fiber_g'] ?? 5.0).toStringAsFixed(1)} g';
+
+    return {
+      'id': r.id,
+      'recipeItem': r,
+      'rankedItem': ranked,
+      'name': r.name,
+      'region': r.region ?? 'Ayurvedic',
+      'cuisine': r.cuisine ?? 'Indian',
+      'mealType': r.mealType.isNotEmpty ? r.mealType.first : 'Main Meal',
+      'time': '${(r.cookTimeMin ?? 20) + (r.prepTimeMin ?? 10)} mins',
+      'servings': '${r.servings ?? 2} servings',
+      'availableCount': avail,
+      'totalIngredients': total,
+      'calories': cal,
+      'protein': pro,
+      'iron': iron,
+      'fiber': fiber,
+      'why': r.description ?? 'Supports hormonal balance and provides key nutrients for your current cycle phase.',
+      'tag': isFull ? 'In Kitchen' : '${ranked.matchPercentage.round()}% Match',
+      'tagColor': isFull ? const Color(0xFF10B981) : theme.periodColor,
+      'ingredients': r.ingredients.map((ing) {
+        final inK = !ranked.missingIngredients.any((m) => m.foodId == ing.foodId);
+        return {
+          'name': ing.foodName ?? ing.foodId,
+          'qty': '${ing.quantity % 1 == 0 ? ing.quantity.toInt() : ing.quantity} ${ing.unit}',
+          'inKitchen': inK,
+        };
+      }).toList(),
+      'instructions': r.instructions.isNotEmpty
+          ? r.instructions
+          : ['Cook fresh ingredients with mindful presence and serve warm.'],
+    };
+  }
+
+  List<Map<String, dynamic>> _getFilteredRecipes(List<Map<String, dynamic>> recipes) {
     if (_selectedFilterIndex == 1) {
       // In My Kitchen (100%)
-      return _sampleRecipes.where((r) => r['availableCount'] == r['totalIngredients']).toList();
+      return recipes.where((r) {
+        final avail = r['availableCount'] as int? ?? 0;
+        final total = r['totalIngredients'] as int? ?? 1;
+        return avail >= total && total > 0;
+      }).toList();
     } else if (_selectedFilterIndex == 2) {
       // Vegetarian
-      return _sampleRecipes; // All our curated Ayurvedic recipes are vegetarian
+      return recipes; // All our curated Ayurvedic recipes are vegetarian
     } else if (_selectedFilterIndex == 3) {
       // Quick (< 20m)
-      return _sampleRecipes.where((r) {
+      return recipes.where((r) {
         final timeStr = r['time'] as String;
         final mins = int.tryParse(timeStr.split(' ').first) ?? 30;
         return mins <= 20;
       }).toList();
     } else if (_selectedFilterIndex == 4) {
       // High Protein (> 10g)
-      return _sampleRecipes.where((r) {
+      return recipes.where((r) {
         final proteinStr = (r['protein'] as String).replaceAll(' g', '');
         final protein = double.tryParse(proteinStr) ?? 0.0;
         return protein >= 10.0;
       }).toList();
     }
-    return _sampleRecipes;
+    return recipes;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
     final isCompact = theme.isCompact;
-    final filtered = _filteredRecipes;
+
+    final recState = ref.watch(recommendationNotifierProvider);
+    final cycleState = ref.watch(cycleNotifierProvider);
+    final kitchenState = ref.watch(kitchenNotifierProvider);
+
+    final currentPhase = cycleState.currentState?.phaseInfo;
+    final phaseName = currentPhase?.phaseName ?? 'Active Phase';
+    final focusNutrients = currentPhase?.priorityNutrientNames.isNotEmpty ?? false
+        ? currentPhase!.priorityNutrientNames.take(2).join(' + ')
+        : 'Fiber + Zinc';
+    final phaseSubtitle = '$phaseName • Today\'s focus: $focusNutrients';
+
+    final phaseColor = switch (currentPhase?.phaseId.toLowerCase()) {
+      'menstrual' || 'period' => theme.periodColor,
+      'follicular' || 'growth' => theme.growthColor,
+      'ovulatory' || 'peak' => theme.peakColor,
+      'luteal' => theme.lutealColor,
+      _ => theme.peakColor,
+    };
+
+    final allRecipes = (recState.result?.rankedRecipes.isNotEmpty ?? false)
+        ? recState.result!.rankedRecipes.map((r) => _mapRankedRecipeToUi(r, context)).toList()
+        : _sampleRecipes;
+
+    final filtered = _getFilteredRecipes(allRecipes);
+
+    final kitchenFoodIds = kitchenState.items.map((i) => i.foodId).toSet();
+    final superfoods = (recState.result?.rankedFoods.isNotEmpty ?? false)
+        ? recState.result!.rankedFoods.map((rf) {
+            return {
+              'name': rf.food.name,
+              'foodId': rf.food.id,
+              'benefit': rf.matchReasons.isNotEmpty ? rf.matchReasons.first : 'Nutrient Dense',
+              'badge': rf.matchReasons.length > 1 ? rf.matchReasons[1] : 'Phase Match',
+              'color': const Color(0xFF00BFA5),
+              'icon': Icons.grass_rounded,
+              'inKitchen': kitchenFoodIds.contains(rf.food.id),
+            };
+          }).toList()
+        : _superfoods;
 
     return Scaffold(
       backgroundColor: theme.screenBackground,
@@ -270,14 +364,14 @@ class _EatScreenState extends ConsumerState<EatScreen> {
                               width: 7,
                               height: 7,
                               decoration: BoxDecoration(
-                                color: theme.peakColor,
+                                color: phaseColor,
                                 shape: BoxShape.circle,
                               ),
                             ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Peak Phase • Today\'s focus: Fiber + Zinc',
+                                phaseSubtitle,
                                 style: theme.screenSubtitleStyle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -423,7 +517,21 @@ class _EatScreenState extends ConsumerState<EatScreen> {
                                 },
                               );
                         },
-                        onAddToCart: () {
+                        onAddToCart: () async {
+                          final recipeItem = recipe['recipeItem'] as RecipeItem?;
+                          if (recipeItem != null) {
+                            final shoppingService = ref.read(shoppingServiceProvider);
+                            final kitchenItems = ref.read(kitchenNotifierProvider).items;
+                            final missingItems = shoppingService.generateMissingIngredients(
+                              selectedRecipes: [recipeItem],
+                              kitchenInventory: kitchenItems,
+                            );
+                            if (missingItems.isNotEmpty) {
+                              await ref.read(shoppingNotifierProvider.notifier).addItems(missingItems);
+                              return;
+                            }
+                          }
+
                           final ingredients = (recipe['ingredients'] as List<Map<String, dynamic>>? ?? []);
                           for (final item in ingredients.where((i) => i['inKitchen'] == false)) {
                             ref.read(shoppingNotifierProvider.notifier).addItem(
@@ -596,10 +704,10 @@ class _EatScreenState extends ConsumerState<EatScreen> {
                 height: 122,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _superfoods.length,
+                  itemCount: superfoods.length,
                   separatorBuilder: (context, index) => const SizedBox(width: 10),
                   itemBuilder: (context, index) {
-                    final item = _superfoods[index];
+                    final item = superfoods[index];
                     final Color accent = item['color'] as Color;
                     final bool inKitchen = item['inKitchen'] as bool;
 

@@ -28,20 +28,31 @@ class RecommendationState {
 }
 
 class RecommendationNotifier extends Notifier<RecommendationState> {
-  late final RecommendationEngine _engine;
+  RecommendationEngine? _engine;
 
   @override
   RecommendationState build() {
-    ref.watch(recommendationEngineProvider).whenData((engine) {
-      _engine = engine;
-      refreshRecommendations();
+    ref.listen(recommendationEngineProvider, (previous, next) {
+      next.whenData((engine) {
+        _engine = engine;
+        refreshRecommendations();
+      });
     });
+
+    final currentEngine = ref.watch(recommendationEngineProvider).value;
+    if (currentEngine != null) {
+      _engine = currentEngine;
+      Future.microtask(() => refreshRecommendations());
+    }
+
     return const RecommendationState();
   }
 
   Future<void> refreshRecommendations({bool forceRemote = false}) async {
+    final RecommendationEngine engine = _engine ?? await ref.read(recommendationEngineProvider.future);
+    _engine = engine;
     state = state.copyWith(isLoading: true, errorMessage: null);
-    final res = await _engine.getRecommendations(forceRemote: forceRemote);
+    final res = await engine.getRecommendations(forceRemote: forceRemote);
     res.fold(
       onOk: (data) => state = state.copyWith(result: data, isLoading: false),
       onErr: (f) => state = state.copyWith(isLoading: false, errorMessage: f.message),

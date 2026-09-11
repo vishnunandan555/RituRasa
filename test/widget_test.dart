@@ -63,7 +63,7 @@ void main() {
     await tester.tap(find.byType(GButton).at(4));
     await tester.pumpAndSettle();
     expect(find.text('My Profile'), findsOneWidget);
-    expect(find.text('Ananya Sharma'), findsOneWidget);
+    expect(find.text('Set Your Name'), findsOneWidget);
     expect(find.text('Cycle Information'), findsOneWidget);
 
     // Tap back to Home Tab (Index 2)

@@ -116,19 +116,34 @@ class KitchenNotifier extends Notifier<KitchenState> {
 
   @override
   KitchenState build() {
-    ref.watch(kitchenRepositoryProvider).whenData((kRepo) {
-      _kitchenRepository = kRepo;
-      loadInventory();
+    ref.listen(kitchenRepositoryProvider, (previous, next) {
+      next.whenData((kRepo) {
+        _kitchenRepository = kRepo;
+        loadInventory();
+      });
     });
-    ref.watch(foodRepositoryProvider).whenData((fRepo) {
-      _foodRepository = fRepo;
+    ref.listen(foodRepositoryProvider, (previous, next) {
+      next.whenData((fRepo) {
+        _foodRepository = fRepo;
+      });
     });
+
+    final currentKRepo = ref.watch(kitchenRepositoryProvider).value;
+    if (currentKRepo != null) {
+      _kitchenRepository = currentKRepo;
+      Future.microtask(() => loadInventory());
+    }
+    final currentFRepo = ref.watch(foodRepositoryProvider).value;
+    if (currentFRepo != null) {
+      _foodRepository = currentFRepo;
+    }
+
     return KitchenState(items: defaultStaples);
   }
 
   Future<void> loadInventory() async {
-    final repo = _kitchenRepository;
-    if (repo == null) return;
+    final IKitchenRepository repo = _kitchenRepository ?? await ref.read(kitchenRepositoryProvider.future);
+    _kitchenRepository = repo;
     state = state.copyWith(isLoading: true, errorMessage: null);
     final res = await repo.getInventory();
     res.fold(

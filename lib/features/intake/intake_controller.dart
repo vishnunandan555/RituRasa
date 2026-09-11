@@ -46,16 +46,25 @@ class IntakeNotifier extends Notifier<IntakeState> {
   IntakeState build() {
     _progressService = ref.watch(nutritionProgressServiceProvider);
     final todayStr = DateTime.now().toIso8601String().substring(0, 10);
-    ref.watch(intakeRepositoryProvider).whenData((repo) {
-      _intakeRepository = repo;
-      loadIntakesForDate(todayStr);
+    ref.listen(intakeRepositoryProvider, (previous, next) {
+      next.whenData((repo) {
+        _intakeRepository = repo;
+        loadIntakesForDate(todayStr);
+      });
     });
+
+    final currentRepo = ref.watch(intakeRepositoryProvider).value;
+    if (currentRepo != null) {
+      _intakeRepository = currentRepo;
+      Future.microtask(() => loadIntakesForDate(todayStr));
+    }
+
     return IntakeState(date: todayStr);
   }
 
   Future<void> loadIntakesForDate(String date) async {
-    final repo = _intakeRepository;
-    if (repo == null) return;
+    final IIntakeRepository repo = _intakeRepository ?? await ref.read(intakeRepositoryProvider.future);
+    _intakeRepository = repo;
     state = state.copyWith(date: date, isLoading: true, errorMessage: null);
     final res = await repo.getIntakesForDate(date);
     res.fold(

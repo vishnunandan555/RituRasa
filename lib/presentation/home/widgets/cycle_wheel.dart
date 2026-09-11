@@ -18,6 +18,7 @@ class CycleWheel extends StatefulWidget {
   final int totalCycleDays;
   final String currentPhaseName;
   final ValueChanged<int>? onDaySelected;
+  final VoidCallback? onLongPress;
 
   const CycleWheel({
     super.key,
@@ -25,6 +26,7 @@ class CycleWheel extends StatefulWidget {
     this.totalCycleDays = 28,
     required this.currentPhaseName,
     this.onDaySelected,
+    this.onLongPress,
   });
 
   @override
@@ -154,6 +156,12 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
       child: GestureDetector(
         onPanUpdate: (details) => _handlePanOrTap(details.localPosition, Size(dialSize, dialSize)),
         onTapDown: (details) => _handlePanOrTap(details.localPosition, Size(dialSize, dialSize)),
+        onLongPress: widget.onLongPress != null
+            ? () {
+                HapticFeedback.heavyImpact();
+                widget.onLongPress!();
+              }
+            : null,
         child: SizedBox(
           width: dialSize,
           height: dialSize,

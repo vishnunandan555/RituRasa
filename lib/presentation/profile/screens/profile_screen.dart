@@ -171,22 +171,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final cycleRecord = cycleState.latestRecord;
     final cycleDayState = cycleState.currentState;
 
-    // Derived values with sensible fallbacks
-    final name = profile?.name ?? 'Ananya Sharma';
-    final age = profile?.age ?? 28;
-    final prakriti = profile?.prakriti ?? 'Pitta-Vata';
-    final agni = profile?.agni ?? 'Tikshna';
+    // Derived values with clean, actionable defaults
+    final hasName = profile?.name != null && profile!.name.trim().isNotEmpty;
+    final name = hasName ? profile!.name : 'Set Your Name';
+    final ageText = profile?.age != null ? '${profile!.age} yrs' : 'Set Age';
+    final prakriti = (profile?.prakriti != null && profile!.prakriti.isNotEmpty) ? profile!.prakriti : 'Set Prakriti';
+    final agni = (profile?.agni != null && profile!.agni.isNotEmpty) ? profile!.agni : 'Sama (Balanced)';
     final dietType = profile?.dietType.name.toUpperCase() ?? 'VEGETARIAN';
-    final cuisine = profile?.cuisine ?? 'South Indian & Coastal';
+    final cuisine = (profile?.cuisine != null && profile!.cuisine.isNotEmpty) ? profile!.cuisine : 'Indian (All Regions)';
 
     final cycleLength = cycleRecord?.cycleLength ?? 28;
     final lastPeriodDate = cycleRecord != null
         ? DateFormat('MMM d, yyyy').format(cycleRecord.periodStart)
-        : 'May 30, 2026';
-    final currentDay = cycleDayState?.currentCycleDay ?? 12;
-    final phaseName = cycleDayState?.phaseInfo.phaseName.toUpperCase() ?? 'PEAK';
+        : 'Tap to record';
+    final currentDay = cycleDayState?.currentCycleDay ?? 1;
+    final phaseName = cycleDayState?.phaseInfo.phaseName.toUpperCase() ?? 'PERIOD';
 
-    final allergies = preferences?.allergies ?? ['Peanuts', 'Excess Red Chili'];
+    final allergies = preferences?.allergies ?? const <String>[];
 
     return Scaffold(
       backgroundColor: theme.screenBackground,
@@ -267,7 +268,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '$prakriti Prakriti • $age yrs',
+                              '$prakriti Prakriti • $ageText',
                               style: GoogleFonts.outfit(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,

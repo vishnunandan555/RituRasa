@@ -26,27 +26,27 @@ class InitialDataSeeder {
     if (profileCount == 0) {
       await db.insert(UserDatabaseSchema.tableProfile, {
         'id': 'default_user',
-        'name': 'Ananya Sharma',
-        'age': 28,
-        'prakriti': 'Pitta-Vata',
-        'agni': 'Tikshna',
-        'diet_type': 'vegetarian',
-        'region': 'South Indian',
-        'cuisine': 'South Indian',
+        'name': '',
+        'age': null,
+        'prakriti': '',
+        'agni': '',
+        'diet_type': '',
+        'region': '',
+        'cuisine': '',
         'created_at': now.toIso8601String(),
         'updated_at': now.toIso8601String(),
       });
 
       await db.insert(UserDatabaseSchema.tablePreferences, {
         'user_id': 'default_user',
-        'preferred_food_ids_json': jsonEncode(['F001', 'F002']),
+        'preferred_food_ids_json': jsonEncode([]),
         'excluded_food_ids_json': jsonEncode([]),
-        'allergies_json': jsonEncode(['Peanuts']),
+        'allergies_json': jsonEncode([]),
         'updated_at': now.toIso8601String(),
       });
     }
 
-    // 2. Cycle Record (initialize to Day 12 of 28 for peak phase)
+    // 2. Cycle Record (leave unseeded or seed default 28 day cycle starting 11 days ago until user customizes via long-press)
     final cycleCount = Sqflite.firstIntValue(
       await db.rawQuery('SELECT COUNT(*) FROM ${UserDatabaseSchema.tableCycleHistory}'),
     ) ?? 0;

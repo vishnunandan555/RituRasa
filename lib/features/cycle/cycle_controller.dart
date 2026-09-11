@@ -34,22 +34,33 @@ class CycleStateModel {
 }
 
 class CycleNotifier extends Notifier<CycleStateModel> {
-  late final ICycleRepository _repository;
+  ICycleRepository? _repository;
   late final CycleService _cycleService;
 
   @override
   CycleStateModel build() {
     _cycleService = ref.watch(cycleServiceProvider);
-    ref.watch(cycleRepositoryProvider).whenData((repo) {
-      _repository = repo;
-      loadCycle();
+    ref.listen(cycleRepositoryProvider, (previous, next) {
+      next.whenData((repo) {
+        _repository = repo;
+        loadCycle();
+      });
     });
+
+    final currentRepo = ref.watch(cycleRepositoryProvider).value;
+    if (currentRepo != null) {
+      _repository = currentRepo;
+      Future.microtask(() => loadCycle());
+    }
+
     return const CycleStateModel();
   }
 
   Future<void> loadCycle() async {
+    final ICycleRepository repo = _repository ?? await ref.read(cycleRepositoryProvider.future);
+    _repository = repo;
     state = state.copyWith(isLoading: true, errorMessage: null);
-    final res = await _repository.getLatestCycleLog();
+    final res = await repo.getLatestCycleLog();
     res.fold(
       onOk: (record) {
         if (record != null) {
@@ -77,6 +88,8 @@ class CycleNotifier extends Notifier<CycleStateModel> {
     int cycleLength = 28,
     int? flowDuration,
   }) async {
+    final ICycleRepository repo = _repository ?? await ref.read(cycleRepositoryProvider.future);
+    _repository = repo;
     state = state.copyWith(isLoading: true);
     final now = DateTime.now();
     final periodEnd = flowDuration != null
@@ -91,7 +104,7 @@ class CycleNotifier extends Notifier<CycleStateModel> {
       updatedAt: now,
     );
 
-    final res = await _repository.saveCycleLog(record);
+    final res = await repo.saveCycleLog(record);
     if (res.isOk) {
       final stateRes = _cycleService.calculateCycleState(
         lastPeriodStart: periodStart,
@@ -106,6 +119,19 @@ class CycleNotifier extends Notifier<CycleStateModel> {
       state = state.copyWith(isLoading: false, errorMessage: res.failureOrNull?.message);
     }
     return res;
+  }
+
+  Future<Result<void>> logPeriodEnd(
+    DateTime periodEnd, {
+    required int flowDuration,
+    int cycleLength = 28,
+  }) async {
+    final periodStart = periodEnd.subtract(Duration(days: flowDuration - 1));
+    return await logPeriodStart(
+      periodStart,
+      cycleLength: cycleLength,
+      flowDuration: flowDuration,
+    );
   }
 }
 

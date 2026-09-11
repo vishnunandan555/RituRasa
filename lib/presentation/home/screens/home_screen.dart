@@ -19,6 +19,7 @@ import 'package:riturasa/presentation/home/widgets/cycle_window_card.dart';
 import 'package:riturasa/presentation/home/widgets/hydration_card.dart';
 import 'package:riturasa/presentation/home/widgets/nutrition_overview_section.dart';
 import 'package:riturasa/presentation/home/widgets/phase_legend.dart';
+import 'package:riturasa/presentation/home/widgets/set_period_date_sheet.dart';
 import 'package:riturasa/presentation/navigation/screens/main_shell_screen.dart';
 
 /// RituRasa Home Screen featuring the 28-day circular cycle tracker dial,
@@ -282,6 +283,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // Cycle stats
     final cycleState = ref.watch(cycleNotifierProvider);
+    ref.listen<CycleStateModel>(cycleNotifierProvider, (previous, next) {
+      final calculatedDay = next.currentState?.currentCycleDay;
+      if (calculatedDay != null && calculatedDay != previous?.currentState?.currentCycleDay) {
+        setState(() => _activeDay = calculatedDay);
+      }
+    });
     final totalCycleDays = cycleState.latestRecord?.cycleLength ?? 28;
     final activePhaseName = _getPhaseNameForDay(_activeDay);
 
@@ -433,6 +440,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _activeDay = day;
                   });
                 },
+                onLongPress: () => SetPeriodDateSheet.show(context),
               ).animate().fadeIn(duration: 260.ms, delay: 40.ms).scale(begin: const Offset(0.97, 0.97), curve: Curves.easeOutCubic),
 
               const SizedBox(height: 24),
@@ -449,9 +457,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 currentDay: _activeDay,
                 totalDays: totalCycleDays,
                 onTap: () {
-                  setState(() {
-                    _activeDay = 1;
-                  });
+                  SetPeriodDateSheet.show(context);
                 },
               )
                   .animate()

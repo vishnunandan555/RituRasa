@@ -33,25 +33,35 @@ class ProfileState {
 }
 
 class ProfileNotifier extends Notifier<ProfileState> {
-  late final IProfileRepository _repository;
+  IProfileRepository? _repository;
 
   @override
   ProfileState build() {
-    // Initial state
-    ref.watch(profileRepositoryProvider).whenData((repo) {
-      _repository = repo;
-      loadProfile();
+    ref.listen(profileRepositoryProvider, (previous, next) {
+      next.whenData((repo) {
+        _repository = repo;
+        loadProfile();
+      });
     });
+
+    final currentRepo = ref.watch(profileRepositoryProvider).value;
+    if (currentRepo != null) {
+      _repository = currentRepo;
+      Future.microtask(() => loadProfile());
+    }
+
     return const ProfileState();
   }
 
   Future<void> loadProfile() async {
+    final IProfileRepository repo = _repository ?? await ref.read(profileRepositoryProvider.future);
+    _repository = repo;
     state = state.copyWith(isLoading: true, errorMessage: null);
-    final res = await _repository.getProfile();
+    final res = await repo.getProfile();
     res.fold(
       onOk: (profile) async {
         if (profile != null) {
-          final prefRes = await _repository.getPreferences(profile.id);
+          final prefRes = await repo.getPreferences(profile.id);
           state = state.copyWith(
             profile: profile,
             preferences: prefRes.valueOrNull,
@@ -68,8 +78,10 @@ class ProfileNotifier extends Notifier<ProfileState> {
   }
 
   Future<Result<void>> updateProfile(UserProfile profile) async {
+    final IProfileRepository repo = _repository ?? await ref.read(profileRepositoryProvider.future);
+    _repository = repo;
     state = state.copyWith(isLoading: true);
-    final res = await _repository.saveProfile(profile);
+    final res = await repo.saveProfile(profile);
     if (res.isOk) {
       state = state.copyWith(profile: profile, isLoading: false);
     } else {
@@ -79,8 +91,10 @@ class ProfileNotifier extends Notifier<ProfileState> {
   }
 
   Future<Result<void>> updatePreferences(UserPreferences preferences) async {
+    final IProfileRepository repo = _repository ?? await ref.read(profileRepositoryProvider.future);
+    _repository = repo;
     state = state.copyWith(isLoading: true);
-    final res = await _repository.savePreferences(preferences);
+    final res = await repo.savePreferences(preferences);
     if (res.isOk) {
       state = state.copyWith(preferences: preferences, isLoading: false);
     } else {

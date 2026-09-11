@@ -304,7 +304,7 @@ class _QuickFoodLogSheetState extends ConsumerState<QuickFoodLogSheet> {
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: _searchResults.length,
-                      separatorBuilder: (_, __) => Divider(height: 1, color: theme.cardBorder),
+                      separatorBuilder: (context, index) => Divider(height: 1, color: theme.cardBorder),
                       itemBuilder: (context, idx) {
                         final food = _searchResults[idx];
                         final isSelected = _selectedFood?.id == food.id;
