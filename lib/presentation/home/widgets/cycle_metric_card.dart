@@ -38,18 +38,18 @@ class CycleMetricCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isCompact ? 12.0 : 16.0,
-            vertical: isCompact ? 14.0 : 18.0,
+            horizontal: isCompact ? 10.0 : 12.0,
+            vertical: isCompact ? 10.0 : 12.0,
           ),
           decoration: BoxDecoration(
             color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(24.0),
+            borderRadius: BorderRadius.circular(20.0),
             border: Border.all(color: theme.cardBorder, width: 1.0),
             boxShadow: [
               BoxShadow(
                 color: theme.cardShadow,
-                blurRadius: 10.0,
-                offset: const Offset(0, 4),
+                blurRadius: 8.0,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -60,8 +60,8 @@ class CycleMetricCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: isCompact ? 34 : 40,
-                    height: isCompact ? 34 : 40,
+                    width: 32,
+                    height: 32,
                     decoration: BoxDecoration(
                       color: iconBgColor,
                       shape: BoxShape.circle,
@@ -70,46 +70,58 @@ class CycleMetricCard extends StatelessWidget {
                     alignment: Alignment.center,
                     child: icon,
                   ),
-                  SizedBox(width: isCompact ? 8 : 10),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      title,
-                      style: theme.cardTitleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        title,
+                        style: theme.cardTitleStyle.copyWith(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                      ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: isCompact ? 10 : 14),
+              const SizedBox(height: 8),
 
               // Middle Row: Pill Badge (with FittedBox to prevent text wrapping)
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isCompact ? 9.0 : 12.0,
-                  vertical: isCompact ? 4.0 : 6.0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 9.0,
+                  vertical: 3.5,
                 ),
                 decoration: BoxDecoration(
                   color: pillBgColor,
-                  borderRadius: BorderRadius.circular(16.0),
+                  borderRadius: BorderRadius.circular(14.0),
                 ),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     pillText,
-                    style: theme.cardPillTextStyle.copyWith(color: pillTextColor),
+                    style: theme.cardPillTextStyle.copyWith(
+                      color: pillTextColor,
+                      fontSize: 11.5,
+                    ),
                     maxLines: 1,
                   ),
                 ),
               ),
-              SizedBox(height: isCompact ? 8 : 12),
+              const SizedBox(height: 6),
 
               // Bottom Row: Subtitle
-              Text(
-                subtitle,
-                style: theme.cardSubtitleStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  subtitle,
+                  style: theme.cardSubtitleStyle.copyWith(fontSize: 11.5),
+                  maxLines: 1,
+                ),
               ),
             ],
           ),

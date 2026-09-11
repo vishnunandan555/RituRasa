@@ -4,14 +4,15 @@ import 'package:riturasa/core/theme/riturasa_theme.dart';
 
 /// CustomPainter drawing the 28-day circular cycle tracker.
 ///
-/// Matches the reference design:
-/// - Full circle of small light-gray inactive dot beads.
-/// - Solid per-phase colored arc strokes connecting the active days.
-/// - Phase-colored filled beads sit on top of the arc strokes.
-/// - Day 1 as a hollow pink ring. Day 14 as a hollow teal ring + "OVULATION" label.
-/// - Active selected day as a large filled badge with the day number.
-/// - Breathing pulse animation on the active badge and ovulation ring.
-/// - Cardinal day labels (1, 7, 14, 21, 28) outside the ring.
+/// Refined & professional layout:
+/// - Perfectly balanced diameter matching reference aesthetics.
+/// - Full circle of small, dainty light-gray inactive beads.
+/// - Crisp per-phase colored arc strokes connecting active days.
+/// - Phase-colored filled beads on top of the arc strokes.
+/// - Day 1 as a hollow pink ring. Day 14 as a hollow teal ring.
+/// - Clean "OVULATION" label positioned comfortably inside the arc without bead collision.
+/// - Active selected day as a clean filled badge with the day number.
+/// - Cardinal day labels (1, 7, 14, 21, 28) outside the ring with generous spacing.
 class CycleWheelPainter extends CustomPainter {
   final int totalDays;
   final double currentCycleDay; // animated double for smooth transition
@@ -29,7 +30,7 @@ class CycleWheelPainter extends CustomPainter {
     this.pulseProgress = 0.0,
   });
 
-  // Continuous 4-phase boundaries connecting seamlessly at boundary beads
+  // Continuous 4-phase boundaries connecting seamlessly
   static const _phaseBoundaries = [
     (start: 1.0, end: 5.0, name: 'Period'),
     (start: 5.0, end: 10.0, name: 'Growth'),
@@ -40,7 +41,8 @@ class CycleWheelPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (min(size.width, size.height) / 2) - 22;
+    // Radius leaves room for outside day labels
+    final radius = (min(size.width, size.height) / 2) - 16.0;
 
     const startAngle = -pi / 2;
     final sweepPerDay = (2 * pi) / totalDays;
@@ -55,9 +57,9 @@ class CycleWheelPainter extends CustomPainter {
       center,
       radius,
       Paint()
-        ..color = theme.inactiveTrackColor.withValues(alpha: 0.45)
+        ..color = const Color(0xFFE5E7EB).withValues(alpha: 0.5)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0,
+        ..strokeWidth = 1.8,
     );
 
     // =========================================================================
@@ -69,9 +71,9 @@ class CycleWheelPainter extends CustomPainter {
       final y = center.dy + radius * sin(angle);
       canvas.drawCircle(
         Offset(x, y),
-        3.5,
+        2.5,
         Paint()
-          ..color = theme.inactiveTrackColor
+          ..color = const Color(0xFFE5E7EB)
           ..style = PaintingStyle.fill,
       );
     }
@@ -82,7 +84,7 @@ class CycleWheelPainter extends CustomPainter {
     final dialRect = Rect.fromCircle(center: center, radius: radius);
     final arcPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.5
+      ..strokeWidth = 3.5
       ..strokeCap = StrokeCap.round;
 
     for (final phase in _phaseBoundaries) {
@@ -113,13 +115,13 @@ class CycleWheelPainter extends CustomPainter {
       final y = center.dy + radius * sin(angle);
       final phaseColor = _getColorForDay(day);
 
-      // White backing for crisp edges
-      canvas.drawCircle(Offset(x, y), 5.8, Paint()
-        ..color = theme.screenBackground
+      // Crisp white backing
+      canvas.drawCircle(Offset(x, y), 4.2, Paint()
+        ..color = Colors.white
         ..style = PaintingStyle.fill);
 
       // Phase-colored bead
-      canvas.drawCircle(Offset(x, y), 4.8, Paint()
+      canvas.drawCircle(Offset(x, y), 3.2, Paint()
         ..color = phaseColor
         ..style = PaintingStyle.fill);
     }
@@ -132,13 +134,13 @@ class CycleWheelPainter extends CustomPainter {
       final x = center.dx + radius * cos(angle);
       final y = center.dy + radius * sin(angle);
 
-      canvas.drawCircle(Offset(x, y), 6.0, Paint()
-        ..color = theme.screenBackground
+      canvas.drawCircle(Offset(x, y), 4.5, Paint()
+        ..color = Colors.white
         ..style = PaintingStyle.fill);
-      canvas.drawCircle(Offset(x, y), 6.0, Paint()
+      canvas.drawCircle(Offset(x, y), 4.5, Paint()
         ..color = theme.periodColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5);
+        ..strokeWidth = 2.0);
     }
 
     // =========================================================================
@@ -149,29 +151,29 @@ class CycleWheelPainter extends CustomPainter {
       final day14X = center.dx + radius * cos(day14Angle);
       final day14Y = center.dy + radius * sin(day14Angle);
 
-      final ovPulse = 1.0 + (0.07 * pulseProgress);
-      final ovRadius = 7.5 * ovPulse;
+      final ovPulse = 1.0 + (0.06 * pulseProgress);
+      final ovRadius = 6.0 * ovPulse;
 
       // Soft glow
       canvas.drawCircle(
         Offset(day14X, day14Y),
-        ovRadius + 3.5,
+        ovRadius + 2.5,
         Paint()
-          ..color = theme.ovulationHighlightColor.withValues(alpha: 0.18 + 0.10 * pulseProgress)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0),
+          ..color = theme.ovulationHighlightColor.withValues(alpha: 0.20 + 0.10 * pulseProgress)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0),
       );
       // White fill
       canvas.drawCircle(Offset(day14X, day14Y), ovRadius, Paint()
-        ..color = theme.screenBackground
+        ..color = Colors.white
         ..style = PaintingStyle.fill);
       // Teal stroke
       canvas.drawCircle(Offset(day14X, day14Y), ovRadius, Paint()
         ..color = theme.ovulationHighlightColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5);
+        ..strokeWidth = 2.2);
 
-      // "OVULATION" label — to the left of Day 14, inside the circle
-      _drawOvulationLabel(canvas, center, radius, day14Angle, day14X, day14Y);
+      // "OVULATION" label — placed inside the ring with adequate spacing
+      _drawOvulationLabel(canvas, center, radius, day14Angle, sweepPerDay);
     }
 
     // =========================================================================
@@ -183,16 +185,16 @@ class CycleWheelPainter extends CustomPainter {
       final activeY = center.dy + radius * sin(activeAngle);
 
       final activeColor = _getColorForDay(activeDay);
-      final badgeScale = 1.0 + (0.055 * pulseProgress);
-      final badgeRadius = 13.0 * badgeScale;
+      final badgeScale = 1.0 + (0.04 * pulseProgress);
+      final badgeRadius = 10.5 * badgeScale;
 
       // Colored ambient glow
       canvas.drawCircle(
         Offset(activeX, activeY),
-        badgeRadius + 4.5,
+        badgeRadius + 3.5,
         Paint()
-          ..color = activeColor.withValues(alpha: 0.30 + 0.12 * pulseProgress)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7.0),
+          ..color = activeColor.withValues(alpha: 0.28 + 0.10 * pulseProgress)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0),
       );
       // Badge fill
       canvas.drawCircle(Offset(activeX, activeY), badgeRadius, Paint()
@@ -200,7 +202,7 @@ class CycleWheelPainter extends CustomPainter {
         ..style = PaintingStyle.fill);
       // Subtle white rim
       canvas.drawCircle(Offset(activeX, activeY), badgeRadius, Paint()
-        ..color = Colors.white.withValues(alpha: 0.25)
+        ..color = Colors.white.withValues(alpha: 0.3)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0);
 
@@ -209,7 +211,7 @@ class CycleWheelPainter extends CustomPainter {
         text: '$activeDay',
         style: TextStyle(
           color: Colors.white,
-          fontSize: activeDay > 9 ? 11.5 : 12.5,
+          fontSize: activeDay > 9 ? 9.5 : 10.5,
           fontWeight: FontWeight.w800,
           fontFamily: theme.cycleDayLabelStyle.fontFamily,
         ),
@@ -222,7 +224,7 @@ class CycleWheelPainter extends CustomPainter {
     // =========================================================================
     // PASS 8: Cardinal Day Labels (1, 7, 14, 21, 28) — outside the ring
     // =========================================================================
-    final labelRadius = radius + 19.0;
+    final labelRadius = radius + 13.5;
     _drawDayLabel(canvas, center, labelRadius, 1, startAngle);
     _drawDayLabel(canvas, center, labelRadius, 7, startAngle + (6 * sweepPerDay));
     _drawDayLabel(canvas, center, labelRadius, 14, startAngle + (13 * sweepPerDay));
@@ -230,39 +232,35 @@ class CycleWheelPainter extends CustomPainter {
     _drawDayLabel(canvas, center, labelRadius, 28, startAngle + (27 * sweepPerDay));
   }
 
-  /// Draws "OVULATION" label to the LEFT of Day 14 bead, inside the circle.
-  /// Day 14 is at the bottom of the ring (~6 o'clock). In the reference image
-  /// the label sits to the upper-left of Day 14, inside the ring.
+  /// Draws "OVULATION" label cleanly along the inside arc to the upper-left of Day 14.
   void _drawOvulationLabel(
     Canvas canvas,
     Offset center,
     double radius,
     double day14Angle,
-    double day14X,
-    double day14Y,
+    double sweepPerDay,
   ) {
     final ts = TextSpan(
       text: 'OVULATION',
       style: TextStyle(
-        color: theme.textSecondary.withValues(alpha: 0.55),
-        fontSize: 9.0,
+        color: const Color(0xFF9CA3AF),
+        fontSize: 8.5,
         fontWeight: FontWeight.w700,
-        letterSpacing: 1.1,
+        letterSpacing: 1.0,
         fontFamily: theme.cycleDayLabelStyle.fontFamily,
       ),
     );
     final tp = TextPainter(text: ts, textAlign: TextAlign.center, textDirection: TextDirection.ltr)
       ..layout();
 
-    // Position: slightly inside the ring, to the left of Day 14.
-    // Day 14 sits near the bottom. Shift left by label width + small gap,
-    // and slightly upward (inward) so the label right-edge is just before the ring bead.
-    const horizontalGap = 6.0;
-    const inwardShift = 10.0;
-    final labelX = day14X - tp.width - horizontalGap;
-    final labelY = day14Y - inwardShift - tp.height / 2;
+    // Position: inside the ring, placed along the arc around Day 12.5 so it sits
+    // gracefully before Day 14 with 18px inward clearance (never touching the arc or beads).
+    final labelAngle = day14Angle - (1.6 * sweepPerDay);
+    final labelDistance = radius - 18.0;
+    final labelX = center.dx + labelDistance * cos(labelAngle);
+    final labelY = center.dy + labelDistance * sin(labelAngle);
 
-    tp.paint(canvas, Offset(labelX, labelY));
+    tp.paint(canvas, Offset(labelX - tp.width / 2, labelY - tp.height / 2));
   }
 
   void _drawDayLabel(
@@ -278,8 +276,8 @@ class CycleWheelPainter extends CustomPainter {
     final ts = TextSpan(
       text: '$dayNumber',
       style: TextStyle(
-        color: theme.textSecondary.withValues(alpha: 0.75),
-        fontSize: 12,
+        color: const Color(0xFF9CA3AF),
+        fontSize: 10.5,
         fontWeight: FontWeight.w700,
         fontFamily: theme.cycleDayLabelStyle.fontFamily,
       ),

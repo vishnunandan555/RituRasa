@@ -255,14 +255,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 style: theme.dateHeaderStyle,
               ).animate().fadeIn(duration: 200.ms).slideY(begin: -0.1, end: 0, curve: Curves.easeOutCubic),
 
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
 
               Text(
                 dateDisplayString,
                 style: theme.dateTitleStyle,
               ).animate().fadeIn(duration: 220.ms, delay: 30.ms).slideY(begin: -0.06, end: 0, curve: Curves.easeOutCubic),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
 
               // 2. Animated Circular Dial Tracker
               CycleWheel(
@@ -276,14 +276,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 },
               ).animate().fadeIn(duration: 260.ms, delay: 40.ms).scale(begin: const Offset(0.97, 0.97), curve: Curves.easeOutCubic),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
               // 3. 4-Phase Legend Row
               PhaseLegend(
                 activePhase: activePhaseName,
               ).animate().fadeIn(duration: 220.ms, delay: 60.ms),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
 
               // 4. Metric Cards Row: Ovulation & Next Period
               Row(

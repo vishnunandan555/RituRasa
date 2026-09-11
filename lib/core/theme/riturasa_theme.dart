@@ -100,8 +100,8 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   /// Responsive card internal horizontal padding
   double get cardHorizontalPadding => isCompact ? 12.0 : 16.0;
 
-  /// Responsive dial size for CycleWheel
-  double get dialSize => (screenWidth - (screenPadding * 2)).clamp(300.0, 356.0);
+  /// Responsive dial size for CycleWheel (compact, balanced, professional)
+  double get dialSize => (screenWidth * 0.64).clamp(235.0, 265.0);
 
   /// Subtle light surface for input fields and containers
   Color get surfaceContainer => const Color(0xFFF9FAFB);
@@ -173,7 +173,7 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       periodColor: const Color(0xFFFA2C56), // Vivid Coral/Pink-Red
       growthColor: const Color(0xFF4A90E2), // Crisp Sky Blue
       peakColor: const Color(0xFF8B5CF6), // Royal Lavender Purple
-      lutealColor: const Color(0xFFE5E7EB), // Soft neutral grey/silver
+      lutealColor: const Color(0xFFF59E0B), // Warm Golden Amber (high contrast, vibrant)
       ovulationHighlightColor: const Color(0xFF10B981), // Emerald Mint
 
       // Surfaces
@@ -238,19 +238,19 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
         letterSpacing: -0.4,
       ),
       cycleDayLabelStyle: GoogleFonts.outfit(
-        fontSize: 15,
-        fontWeight: FontWeight.w500,
+        fontSize: 12.5,
+        fontWeight: FontWeight.w600,
         color: const Color(0xFF6B7280),
-        letterSpacing: -0.2,
+        letterSpacing: 0.3,
       ),
       cycleDayLargeStyle: GoogleFonts.outfit(
-        fontSize: 58,
+        fontSize: 38,
         fontWeight: FontWeight.w800,
         color: const Color(0xFF111827),
-        letterSpacing: -1.0,
+        letterSpacing: -0.8,
       ),
       cycleDayTotalStyle: GoogleFonts.outfit(
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF9CA3AF),
       ),
