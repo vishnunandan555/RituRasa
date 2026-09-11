@@ -106,14 +106,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Text(
                 'Today',
                 style: theme.dateHeaderStyle,
-              ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
+              ).animate().fadeIn(duration: 200.ms).slideY(begin: -0.1, end: 0, curve: Curves.easeOutCubic),
 
               const SizedBox(height: 4),
 
               Text(
                 dateDisplayString,
                 style: theme.dateTitleStyle,
-              ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.1, end: 0),
+              ).animate().fadeIn(duration: 220.ms, delay: 30.ms).slideY(begin: -0.06, end: 0, curve: Curves.easeOutCubic),
 
               const SizedBox(height: 18),
 
@@ -127,14 +127,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _activeDay = day;
                   });
                 },
-              ).animate().fadeIn(duration: 600.ms).scale(begin: const Offset(0.95, 0.95)),
+              ).animate().fadeIn(duration: 260.ms, delay: 40.ms).scale(begin: const Offset(0.97, 0.97), curve: Curves.easeOutCubic),
 
               const SizedBox(height: 20),
 
               // 3. 4-Phase Legend Row
               PhaseLegend(
                 activePhase: activePhaseName,
-              ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
+              ).animate().fadeIn(duration: 220.ms, delay: 60.ms),
 
               const SizedBox(height: 24),
 
@@ -189,8 +189,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               )
                   .animate()
-                  .fadeIn(duration: 700.ms, delay: 350.ms)
-                  .slideY(begin: 0.15, end: 0),
+                  .fadeIn(duration: 240.ms, delay: 80.ms)
+                  .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
 
               const SizedBox(height: 14),
 
@@ -204,8 +204,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 },
               )
                   .animate()
-                  .fadeIn(duration: 700.ms, delay: 400.ms)
-                  .slideY(begin: 0.15, end: 0),
+                  .fadeIn(duration: 240.ms, delay: 100.ms)
+                  .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
 
               const SizedBox(height: 28),
 
@@ -214,16 +214,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 categories: nutrientCategories,
               )
                   .animate()
-                  .fadeIn(duration: 700.ms, delay: 450.ms)
-                  .slideY(begin: 0.15, end: 0),
+                  .fadeIn(duration: 250.ms, delay: 120.ms)
+                  .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
 
               const SizedBox(height: 20),
 
               // 7. Standalone Hydration (Water) Card
               const HydrationCard()
                   .animate()
-                  .fadeIn(duration: 700.ms, delay: 550.ms)
-                  .slideY(begin: 0.15, end: 0),
+                  .fadeIn(duration: 250.ms, delay: 140.ms)
+                  .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
 
               const SizedBox(height: 20),
             ],

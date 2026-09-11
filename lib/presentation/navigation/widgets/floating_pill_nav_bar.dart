@@ -51,7 +51,7 @@ class FloatingPillNavBar extends StatelessWidget {
         color: theme.navBarInactiveContent,
         iconSize: 20,
         curve: Curves.easeOutCubic,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 240),
         textStyle: GoogleFonts.outfit(
           fontSize: 12,
           fontWeight: FontWeight.w700,

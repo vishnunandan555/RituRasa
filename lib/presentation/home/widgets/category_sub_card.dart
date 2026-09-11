@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/widgets/pressable_scale.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
 
 /// Horizontal pill sub-card matching the stacked items on the right
@@ -20,7 +21,7 @@ class CategorySubCard extends StatelessWidget {
     final theme = context.rituTheme;
     final (tintBg, accentColor, icon) = _getStyling(category.type, theme);
 
-    return GestureDetector(
+    return PressableScale(
       onTap: onTap,
       child: Container(
         height: 54,

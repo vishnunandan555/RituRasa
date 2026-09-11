@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/widgets/pressable_scale.dart';
 
 /// Card component for Ovulation and Next Period metric highlights.
 class CycleMetricCard extends StatelessWidget {
@@ -31,7 +32,7 @@ class CycleMetricCard extends StatelessWidget {
     final theme = context.rituTheme;
 
     return Expanded(
-      child: GestureDetector(
+      child: PressableScale(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/widgets/pressable_scale.dart';
 
-/// Standalone Hydration (Water) Tracking Card.
-/// Placed below the 4-category nutrition block with quick glass logger.
+/// Standalone Hydration Tracking Card matching the policy:
+/// Water is tracked as its own distinct card with quick logging (+250ml / 1 glass).
 class HydrationCard extends StatefulWidget {
   final int initialIntakeMl;
   final int targetMl;
@@ -12,7 +12,7 @@ class HydrationCard extends StatefulWidget {
 
   const HydrationCard({
     super.key,
-    this.initialIntakeMl = 1750,
+    this.initialIntakeMl = 1500,
     this.targetMl = 2500,
     this.onIntakeChanged,
   });
@@ -31,7 +31,6 @@ class _HydrationCardState extends State<HydrationCard> {
   }
 
   void _addGlass() {
-    HapticFeedback.lightImpact();
     setState(() {
       _intakeMl = (_intakeMl + 250).clamp(0, widget.targetMl + 1000);
     });
@@ -79,7 +78,7 @@ class _HydrationCardState extends State<HydrationCard> {
               ),
               const SizedBox(width: 12),
 
-              // Title and Subtitle
+              // Title & Glass Count
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,9 +93,9 @@ class _HydrationCardState extends State<HydrationCard> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$glasses of $targetGlasses glasses • Optimal for hormonal balance',
+                      '$glasses of $targetGlasses glasses logged',
                       style: GoogleFonts.outfit(
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w500,
                         color: theme.textSecondary,
                       ),
@@ -105,8 +104,8 @@ class _HydrationCardState extends State<HydrationCard> {
                 ),
               ),
 
-              // Quick Log Button (+250ml)
-              GestureDetector(
+              // Add 1 Glass Button with Tactile PressableScale
+              PressableScale(
                 onTap: _addGlass,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -143,15 +142,22 @@ class _HydrationCardState extends State<HydrationCard> {
 
           const SizedBox(height: 14),
 
-          // Fluid Progress Indicator
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.8),
-              valueColor: AlwaysStoppedAnimation<Color>(theme.hydrationCategoryColor),
-            ),
+          // Fluid Animated Progress Indicator
+          TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0.0, end: progress),
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+            builder: (context, animatedVal, _) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: animatedVal,
+                  minHeight: 8,
+                  backgroundColor: Colors.white.withValues(alpha: 0.8),
+                  valueColor: AlwaysStoppedAnimation<Color>(theme.hydrationCategoryColor),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 8),

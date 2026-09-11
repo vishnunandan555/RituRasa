@@ -51,14 +51,14 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
     _currentAnimatedDay = widget.currentCycleDay.toDouble();
     _previousAnimatedDay = _currentAnimatedDay;
 
-    // 1. Initial Entry Reveal Animation
+    // 1. Initial Entry Reveal Animation (crisp, decisive sweep)
     _entryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 650),
     );
     _entryProgressAnimation = CurvedAnimation(
       parent: _entryController,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeOutQuart,
     );
 
     // 2. Continuous Breathing Pulse Animation for active badge & ovulation ring
@@ -226,8 +226,8 @@ class _CycleWheelState extends State<CycleWheel> with TickerProviderStateMixin {
                 ],
               )
                   .animate()
-                  .fadeIn(duration: 800.ms, curve: Curves.easeOut)
-                  .scale(begin: const Offset(0.92, 0.92), end: const Offset(1.0, 1.0)),
+                  .fadeIn(duration: 350.ms, curve: Curves.easeOutCubic)
+                  .scale(begin: const Offset(0.95, 0.95), end: const Offset(1.0, 1.0), curve: Curves.easeOutCubic),
             ],
           ),
         ),

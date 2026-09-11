@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
 import 'package:riturasa/domain/models/nutrient_category.dart';
 
+import 'package:riturasa/core/widgets/pressable_scale.dart';
+
 /// Large circular progress dial for the focused / least-filled category
 /// matching the exact reference UI layout.
 class CategoryCircularDial extends StatelessWidget {
@@ -20,8 +22,9 @@ class CategoryCircularDial extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.rituTheme;
     final categoryColor = _getCategoryColor(category.type, theme);
+    final targetProgress = (category.percentage / 100.0).clamp(0.0, 1.0);
 
-    return GestureDetector(
+    return PressableScale(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -36,68 +39,92 @@ class CategoryCircularDial extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // 1. Circular Progress Track
-              CustomPaint(
-                size: const Size(140, 140),
-                painter: _DialProgressPainter(
-                  progress: (category.percentage / 100.0).clamp(0.0, 1.0),
-                  activeColor: categoryColor,
-                  trackColor: theme.inactiveTrackColor.withValues(alpha: 0.4),
-                ),
+              // 1. Circular Progress Track with Smooth Animated Tween
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.0, end: targetProgress),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                builder: (context, animatedProgress, _) {
+                  return CustomPaint(
+                    size: const Size(140, 140),
+                    painter: _DialProgressPainter(
+                      progress: animatedProgress,
+                      activeColor: categoryColor,
+                      trackColor: theme.inactiveTrackColor.withValues(alpha: 0.4),
+                    ),
+                  );
+                },
               ),
 
-              // 2. Center Content
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Top Pill Badge (+0 or Focus)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: categoryColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      category.percentage < 50 ? 'Deficit' : '+${category.percentage.toInt()}%',
-                      style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: categoryColor,
+              // 2. Center Content with Smooth Cross-fade/Scale Transformation
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween<double>(begin: 0.94, end: 1.0).animate(
+                        CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
                       ),
+                      child: child,
                     ),
-                  ),
-                  const SizedBox(height: 4),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey(category.type),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Top Pill Badge (+0 or Focus)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: categoryColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          category.percentage < 50 ? 'Deficit' : '+${category.percentage.toInt()}%',
+                          style: GoogleFonts.outfit(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: categoryColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
 
-                  // Category Title
-                  Text(
-                    category.title,
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: theme.textSecondary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                      // Category Title
+                      Text(
+                        category.title,
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: theme.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
 
-                  // Big Percentage
-                  Text(
-                    '${category.percentage.toInt()}%',
-                    style: theme.dialPercentageStyle,
-                  ),
+                      // Big Percentage
+                      Text(
+                        '${category.percentage.toInt()}%',
+                        style: theme.dialPercentageStyle,
+                      ),
 
-                  // Subtitle Details (e.g. 1250 of 2130)
-                  Text(
-                    category.details,
-                    style: GoogleFonts.outfit(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: categoryColor,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                      // Subtitle Details (e.g. 1250 of 2130)
+                      Text(
+                        category.details,
+                        style: GoogleFonts.outfit(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: categoryColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ],
           ),

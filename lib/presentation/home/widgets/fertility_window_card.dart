@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:riturasa/core/theme/riturasa_theme.dart';
+import 'package:riturasa/core/widgets/pressable_scale.dart';
 
 /// Full-width status card displaying the user's fertility window and current phase badge
 /// (e.g. "Fertility Window / High Chance Today" with "🔥 Peak" pill) matching the reference UI mockup.
@@ -20,7 +21,7 @@ class FertilityWindowCard extends StatelessWidget {
     final (title, subtitle, badgeText, badgeIcon, badgeColor, iconData, iconColor, iconBg, iconBorder) =
         _getInfoForDay(currentCycleDay, theme);
 
-    return GestureDetector(
+    return PressableScale(
       onTap: onTap,
       child: Container(
         width: double.infinity,
