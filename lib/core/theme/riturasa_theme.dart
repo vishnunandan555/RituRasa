@@ -46,6 +46,20 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   final Color chipUnselectedBg;
   final Color chipUnselectedText;
 
+  // Nutrition Category Progress Tokens
+  final Color energyCategoryColor;
+  final Color macroCategoryColor;
+  final Color vitaminsCategoryColor;
+  final Color mineralsCategoryColor;
+  final Color hydrationCategoryColor;
+
+  // Category Sub-Card Tinted Surfaces (Matches Reference Design)
+  final Color energySubCardBg;
+  final Color macroSubCardBg;
+  final Color vitaminsSubCardBg;
+  final Color mineralsSubCardBg;
+  final Color hydrationCardBg;
+
   // Typography Styles
   final TextStyle dateHeaderStyle;
   final TextStyle dateTitleStyle;
@@ -59,6 +73,8 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
   final TextStyle cardSubtitleStyle;
   final TextStyle screenTitleStyle;
   final TextStyle screenSubtitleStyle;
+  final TextStyle sectionHeaderStyle;
+  final TextStyle dialPercentageStyle;
 
   const RituRasaThemeExtension({
     required this.periodColor,
@@ -90,6 +106,16 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     required this.chipSelectedText,
     required this.chipUnselectedBg,
     required this.chipUnselectedText,
+    required this.energyCategoryColor,
+    required this.macroCategoryColor,
+    required this.vitaminsCategoryColor,
+    required this.mineralsCategoryColor,
+    required this.hydrationCategoryColor,
+    required this.energySubCardBg,
+    required this.macroSubCardBg,
+    required this.vitaminsSubCardBg,
+    required this.mineralsSubCardBg,
+    required this.hydrationCardBg,
     required this.dateHeaderStyle,
     required this.dateTitleStyle,
     required this.cycleDayLabelStyle,
@@ -102,6 +128,8 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     required this.cardSubtitleStyle,
     required this.screenTitleStyle,
     required this.screenSubtitleStyle,
+    required this.sectionHeaderStyle,
+    required this.dialPercentageStyle,
   });
 
   /// Light theme definition (All-White Minimalist Aesthetic)
@@ -147,6 +175,20 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       chipSelectedText: const Color(0xFFFFFFFF),
       chipUnselectedBg: const Color(0xFFF3F4F6),
       chipUnselectedText: const Color(0xFF4B5563),
+
+      // Nutrition Categories
+      energyCategoryColor: const Color(0xFF2563EB), // Vibrant Royal Blue (like circular ring)
+      macroCategoryColor: const Color(0xFF00BFA5),  // Mint Teal (like Steps)
+      vitaminsCategoryColor: const Color(0xFF10B981), // Fresh Green (like Readiness)
+      mineralsCategoryColor: const Color(0xFF8B5CF6), // Royal Lavender (like Sleep card)
+      hydrationCategoryColor: const Color(0xFF06B6D4), // Ocean Aqua Cyan
+
+      // Sub-Card Tinted Backgrounds
+      energySubCardBg: const Color(0xFFEFF6FF), // Soft Blue tint
+      macroSubCardBg: const Color(0xFFE6FBF7),  // Soft Teal tint
+      vitaminsSubCardBg: const Color(0xFFEBF9E8), // Soft Sage tint
+      mineralsSubCardBg: const Color(0xFFF4EEFD), // Soft Lavender tint
+      hydrationCardBg: const Color(0xFFECFEFF), // Soft Cyan tint
 
       // Text Styles
       dateHeaderStyle: GoogleFonts.outfit(
@@ -214,6 +256,18 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
         fontWeight: FontWeight.w500,
         color: const Color(0xFF6B7280),
       ),
+      sectionHeaderStyle: GoogleFonts.outfit(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF111827),
+        letterSpacing: -0.2,
+      ),
+      dialPercentageStyle: GoogleFonts.outfit(
+        fontSize: 34,
+        fontWeight: FontWeight.w800,
+        color: const Color(0xFF111827),
+        letterSpacing: -0.8,
+      ),
     );
   }
 
@@ -248,6 +302,16 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     Color? chipSelectedText,
     Color? chipUnselectedBg,
     Color? chipUnselectedText,
+    Color? energyCategoryColor,
+    Color? macroCategoryColor,
+    Color? vitaminsCategoryColor,
+    Color? mineralsCategoryColor,
+    Color? hydrationCategoryColor,
+    Color? energySubCardBg,
+    Color? macroSubCardBg,
+    Color? vitaminsSubCardBg,
+    Color? mineralsSubCardBg,
+    Color? hydrationCardBg,
     TextStyle? dateHeaderStyle,
     TextStyle? dateTitleStyle,
     TextStyle? cycleDayLabelStyle,
@@ -260,6 +324,8 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
     TextStyle? cardSubtitleStyle,
     TextStyle? screenTitleStyle,
     TextStyle? screenSubtitleStyle,
+    TextStyle? sectionHeaderStyle,
+    TextStyle? dialPercentageStyle,
   }) {
     return RituRasaThemeExtension(
       periodColor: periodColor ?? this.periodColor,
@@ -293,6 +359,16 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       chipSelectedText: chipSelectedText ?? this.chipSelectedText,
       chipUnselectedBg: chipUnselectedBg ?? this.chipUnselectedBg,
       chipUnselectedText: chipUnselectedText ?? this.chipUnselectedText,
+      energyCategoryColor: energyCategoryColor ?? this.energyCategoryColor,
+      macroCategoryColor: macroCategoryColor ?? this.macroCategoryColor,
+      vitaminsCategoryColor: vitaminsCategoryColor ?? this.vitaminsCategoryColor,
+      mineralsCategoryColor: mineralsCategoryColor ?? this.mineralsCategoryColor,
+      hydrationCategoryColor: hydrationCategoryColor ?? this.hydrationCategoryColor,
+      energySubCardBg: energySubCardBg ?? this.energySubCardBg,
+      macroSubCardBg: macroSubCardBg ?? this.macroSubCardBg,
+      vitaminsSubCardBg: vitaminsSubCardBg ?? this.vitaminsSubCardBg,
+      mineralsSubCardBg: mineralsSubCardBg ?? this.mineralsSubCardBg,
+      hydrationCardBg: hydrationCardBg ?? this.hydrationCardBg,
       dateHeaderStyle: dateHeaderStyle ?? this.dateHeaderStyle,
       dateTitleStyle: dateTitleStyle ?? this.dateTitleStyle,
       cycleDayLabelStyle: cycleDayLabelStyle ?? this.cycleDayLabelStyle,
@@ -305,6 +381,8 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
       cardSubtitleStyle: cardSubtitleStyle ?? this.cardSubtitleStyle,
       screenTitleStyle: screenTitleStyle ?? this.screenTitleStyle,
       screenSubtitleStyle: screenSubtitleStyle ?? this.screenSubtitleStyle,
+      sectionHeaderStyle: sectionHeaderStyle ?? this.sectionHeaderStyle,
+      dialPercentageStyle: dialPercentageStyle ?? this.dialPercentageStyle,
     );
   }
 
@@ -356,6 +434,23 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
           Color.lerp(chipUnselectedBg, other.chipUnselectedBg, t)!,
       chipUnselectedText:
           Color.lerp(chipUnselectedText, other.chipUnselectedText, t)!,
+      energyCategoryColor:
+          Color.lerp(energyCategoryColor, other.energyCategoryColor, t)!,
+      macroCategoryColor:
+          Color.lerp(macroCategoryColor, other.macroCategoryColor, t)!,
+      vitaminsCategoryColor:
+          Color.lerp(vitaminsCategoryColor, other.vitaminsCategoryColor, t)!,
+      mineralsCategoryColor:
+          Color.lerp(mineralsCategoryColor, other.mineralsCategoryColor, t)!,
+      hydrationCategoryColor:
+          Color.lerp(hydrationCategoryColor, other.hydrationCategoryColor, t)!,
+      energySubCardBg: Color.lerp(energySubCardBg, other.energySubCardBg, t)!,
+      macroSubCardBg: Color.lerp(macroSubCardBg, other.macroSubCardBg, t)!,
+      vitaminsSubCardBg:
+          Color.lerp(vitaminsSubCardBg, other.vitaminsSubCardBg, t)!,
+      mineralsSubCardBg:
+          Color.lerp(mineralsSubCardBg, other.mineralsSubCardBg, t)!,
+      hydrationCardBg: Color.lerp(hydrationCardBg, other.hydrationCardBg, t)!,
       dateHeaderStyle: TextStyle.lerp(dateHeaderStyle, other.dateHeaderStyle, t)!,
       dateTitleStyle: TextStyle.lerp(dateTitleStyle, other.dateTitleStyle, t)!,
       cycleDayLabelStyle:
@@ -376,6 +471,10 @@ class RituRasaThemeExtension extends ThemeExtension<RituRasaThemeExtension> {
           TextStyle.lerp(screenTitleStyle, other.screenTitleStyle, t)!,
       screenSubtitleStyle:
           TextStyle.lerp(screenSubtitleStyle, other.screenSubtitleStyle, t)!,
+      sectionHeaderStyle:
+          TextStyle.lerp(sectionHeaderStyle, other.sectionHeaderStyle, t)!,
+      dialPercentageStyle:
+          TextStyle.lerp(dialPercentageStyle, other.dialPercentageStyle, t)!,
     );
   }
 }

@@ -63,6 +63,17 @@ void main() {
     await tester.tap(find.byType(GButton).at(2));
     await tester.pumpAndSettle();
     expect(find.text('Cycle Day'), findsOneWidget);
+
+    // Verify Nutrition Overview Section (4 categories: least filled 49% in circular dial, 3 sub cards)
+    expect(find.text('Daily Nutrition Focus'), findsOneWidget);
+    expect(find.text('49%'), findsOneWidget);
+    expect(find.text('Macronutrients'), findsOneWidget);
+    expect(find.text('Vitamins'), findsOneWidget);
+    expect(find.text('Minerals'), findsOneWidget);
+
+    // Verify Hydration Card
+    expect(find.text('Hydration Tracker'), findsOneWidget);
+    expect(find.text('1 Glass'), findsOneWidget);
   });
 }
 

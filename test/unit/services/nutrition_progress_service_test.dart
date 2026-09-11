@@ -66,6 +66,48 @@ void main() {
       expect(folateProgress.status, equals(NutrientStatus.optimal));
     });
 
+    test('calculateCategoryBreakdown groups 4 categories and sorts least filled first', () {
+      final now = DateTime.now();
+      final entries = [
+        IntakeEntry(
+          id: '1',
+          date: '2026-09-11',
+          name: 'Ragi Porridge',
+          quantity: 1.0,
+          unit: 'serving',
+          mealType: MealType.breakfast,
+          nutrients: const {
+            'energy_kcal': 300.0, // ~14% of 2130 kcal -> lowest!
+            'protein_g': 25.0,    // ~54% of 46g
+            'carbohydrate_g': 140.0, // ~50% of 280g
+            'fat_g': 25.0,        // ~50% of 50g
+            'iron_mg': 20.0,      // ~69% of 29mg
+            'calcium_mg': 700.0,  // 70% of 1000mg
+            'magnesium_mg': 260.0,// 70% of 370mg
+            'zinc_mg': 9.2,       // ~70% of 13.2mg
+            'potassium_mg': 2450.0, // 70% of 3500mg
+            'sodium_mg': 1400.0,  // 70% of 2000mg
+            'vitamin_c_mg': 50.0, // ~77% of 65mg
+            'folate_ug': 180.0,   // ~82% of 220ug
+            'vitamin_b6_mg': 1.5, // ~79% of 1.9mg
+          },
+          loggedAt: now,
+        ),
+      ];
+
+      final summary = service.calculateDailyProgress(
+        date: '2026-09-11',
+        intakes: entries,
+      );
+
+      final categories = service.calculateCategoryBreakdown(summary);
+
+      expect(categories.length, equals(4));
+      // Energy has lowest percentage (14%), so it must be first at index 0!
+      expect(categories.first.title, equals('Energy'));
+      expect(categories.first.percentage, lessThan(categories[1].percentage));
+    });
+
     test('Zero intake produces zero totals with 0% progress', () {
       final summary = service.calculateDailyProgress(
         date: '2026-09-11',

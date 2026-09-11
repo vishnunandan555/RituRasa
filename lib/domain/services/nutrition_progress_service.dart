@@ -1,5 +1,6 @@
-import '../models/intake_entry.dart';
-import '../models/nutrient_totals.dart';
+import 'package:riturasa/domain/models/intake_entry.dart';
+import 'package:riturasa/domain/models/nutrient_category.dart';
+import 'package:riturasa/domain/models/nutrient_totals.dart';
 
 /// Standalone local service calculating daily nutrient intake totals and progress
 /// against authoritative ICMR-NIN RDA (Recommended Dietary Allowances) standards.
@@ -123,5 +124,92 @@ class NutritionProgressService {
       totals: dailyTotals,
       progressMap: progressMap,
     );
+  }
+
+  /// Categorizes nutrients into the 4 primary policy groups:
+  /// Energy, Macronutrients, Vitamins, Minerals.
+  /// Automatically sorts ascending by fulfillment percentage so that
+  /// the least filled category appears first (index 0).
+  List<NutrientCategoryProgress> calculateCategoryBreakdown(DailyProgressSummary summary) {
+    final map = summary.progressMap;
+
+    // 1. Energy
+    final energy = map['energy_kcal'];
+    final energyPct = energy?.percentage ?? 0.0;
+    final energyProgress = NutrientCategoryProgress(
+      type: NutrientCategoryType.energy,
+      title: 'Energy',
+      percentage: double.parse(energyPct.toStringAsFixed(0)),
+      consumed: energy?.consumed ?? 0.0,
+      target: energy?.target ?? 2130.0,
+      unit: 'kcal',
+      details: '${(energy?.consumed ?? 0.0).toInt()} of ${(energy?.target ?? 2130.0).toInt()}',
+      itemBreakdown: energy != null ? [energy] : [],
+    );
+
+    // 2. Macronutrients
+    const macroKeys = ['protein_g', 'carbohydrate_g', 'fat_g', 'fiber_g'];
+    final macroItems = macroKeys.map((k) => map[k]).whereType<NutrientProgress>().toList();
+    final macroAvg = macroItems.isNotEmpty
+        ? macroItems.map((e) => e.percentage).reduce((a, b) => a + b) / macroItems.length
+        : 0.0;
+    final macroProgress = NutrientCategoryProgress(
+      type: NutrientCategoryType.macro,
+      title: 'Macronutrients',
+      percentage: double.parse(macroAvg.toStringAsFixed(0)),
+      consumed: (map['protein_g']?.consumed ?? 0.0) +
+          (map['carbohydrate_g']?.consumed ?? 0.0) +
+          (map['fat_g']?.consumed ?? 0.0),
+      target: 201.0,
+      unit: 'g',
+      details: '${macroAvg.toInt()} of 100',
+      itemBreakdown: macroItems,
+    );
+
+    // 3. Vitamins
+    const vitaminKeys = ['vitamin_c_mg', 'folate_ug', 'vitamin_b6_mg'];
+    final vitaminItems = vitaminKeys.map((k) => map[k]).whereType<NutrientProgress>().toList();
+    final vitaminAvg = vitaminItems.isNotEmpty
+        ? vitaminItems.map((e) => e.percentage).reduce((a, b) => a + b) / vitaminItems.length
+        : 0.0;
+    final vitaminProgress = NutrientCategoryProgress(
+      type: NutrientCategoryType.vitamins,
+      title: 'Vitamins',
+      percentage: double.parse(vitaminAvg.toStringAsFixed(0)),
+      consumed: vitaminAvg,
+      target: 100.0,
+      unit: '%',
+      details: '${vitaminAvg.toInt()} of 100',
+      itemBreakdown: vitaminItems,
+    );
+
+    // 4. Minerals
+    const mineralKeys = [
+      'iron_mg',
+      'calcium_mg',
+      'magnesium_mg',
+      'zinc_mg',
+      'potassium_mg',
+      'sodium_mg'
+    ];
+    final mineralItems = mineralKeys.map((k) => map[k]).whereType<NutrientProgress>().toList();
+    final mineralAvg = mineralItems.isNotEmpty
+        ? mineralItems.map((e) => e.percentage).reduce((a, b) => a + b) / mineralItems.length
+        : 0.0;
+    final mineralProgress = NutrientCategoryProgress(
+      type: NutrientCategoryType.minerals,
+      title: 'Minerals',
+      percentage: double.parse(mineralAvg.toStringAsFixed(0)),
+      consumed: mineralAvg,
+      target: 100.0,
+      unit: '%',
+      details: '${mineralAvg.toInt()} of 100',
+      itemBreakdown: mineralItems,
+    );
+
+    final list = [energyProgress, macroProgress, vitaminProgress, mineralProgress];
+    // Sort ascending by percentage: least filled category will be first at index 0
+    list.sort((a, b) => a.percentage.compareTo(b.percentage));
+    return list;
   }
 }
